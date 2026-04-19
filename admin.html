@@ -1,0 +1,80 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Админка свадьбы - полная таблица</title>
+  <style>
+    body { font-family: system-ui; padding: 20px; background: #f5f5f5; }
+    table { border-collapse: collapse; width: 100%; background: white; margin-top: 20px; }
+    th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+    th { background: #9B6B5C; color: white; }
+  </style>
+</head>
+<body>
+  <h1>Все ответы гостей (объединённые)</h1>
+  <div id="allGuestsTable">Загрузка...</div>
+
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+  <script src="firebase-config.js"></script>
+  <script>
+    async function loadAllGuests() {
+      const container = document.getElementById('allGuestsTable');
+      try {
+        const snapshot = await db.collection("guests").orderBy("timestamp", "desc").get();
+        if (snapshot.empty) {
+          container.innerHTML = '<p>Нет ответов</p>';
+          return;
+        }
+        let html = `<table><thead>
+          <tr>
+            <th>Имя</th>
+            <th>Придёт?</th>
+            <th>Трансфер</th>
+            <th>Алкоголь</th>
+            <th>Остановка в Казани</th>
+            <th>Останется на след. день</th>
+            <th>Дата ответа</th>
+          </tr>
+        </thead><tbody>`;
+        snapshot.forEach(doc => {
+          const d = doc.data();
+          // Безопасное преобразование значений
+          const name = d.name ? String(d.name) : '—';
+          const attending = d.attending === true ? 'Да' : (d.attending === false ? 'Нет' : '—');
+          const transfer = d.transfer ? String(d.transfer) : '—';
+          const alcohol = d.alcohol ? String(d.alcohol) : '—';
+          const accommodation = d.accommodation ? String(d.accommodation) : '—';
+          const nextDay = d.nextDay ? String(d.nextDay) : '—';
+          const timestamp = d.timestamp ? d.timestamp.toDate().toLocaleString() : '—';
+          
+          html += `<tr>
+            <td>${escapeHtml(name)}</td>
+            <td>${escapeHtml(attending)}</td>
+            <td>${escapeHtml(transfer)}</td>
+            <td>${escapeHtml(alcohol)}</td>
+            <td>${escapeHtml(accommodation)}</td>
+            <td>${escapeHtml(nextDay)}</td>
+            <td>${escapeHtml(timestamp)}</td>
+          </tr>`;
+        });
+        html += '</tbody></table>';
+        container.innerHTML = html;
+      } catch(e) {
+        container.innerHTML = '<p>Ошибка загрузки: ' + e.message + '</p>';
+      }
+    }
+    function escapeHtml(str) {
+      if (str === undefined || str === null) return '';
+      const s = String(str);
+      return s.replace(/[&<>]/g, function(m) {
+        if (m === '&') return '&amp;';
+        if (m === '<') return '&lt;';
+        if (m === '>') return '&gt;';
+        return m;
+      });
+    }
+    loadAllGuests();
+  </script>
+</body>
+</html>

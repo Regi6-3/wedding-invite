@@ -1,0 +1,192 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title>Свадьба Алексея и Регины</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Roboto:wght@300;400;500&family=Cormorant+Infant:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="light-bg">
+  <div class="container">
+
+    <div class="top-buttons">
+      <button id="addToCalendarBtn" class="calendar-btn"><i class="far fa-calendar-plus"></i> Добавить в календарь</button>
+      <button id="playMusicBtn" class="music-btn"><i class="fas fa-music"></i> Включить музыку</button>
+    </div>
+    <audio id="weddingAudio" loop preload="auto">
+      <source src="music.mp3" type="audio/mpeg">
+    </audio>
+
+    <div class="photo-card">
+      <div class="photo-name-block">
+        <img src="images/alexey.jpg" alt="Алексей" class="portrait">
+        <div class="name-caption">Алексей</div>
+      </div>
+    </div>
+
+    <div class="plus-sign">+</div>
+
+    <div class="photo-card">
+      <div class="photo-name-block">
+        <img src="images/regina.png" alt="Регина" class="portrait">
+        <div class="name-caption">Регина</div>
+      </div>
+    </div>
+
+    <div class="heart-equation">А + Р = ♡</div>
+    <div class="wedding-date-big">28 августа 2026</div>
+
+    <div class="countdown" id="countdown">
+      <div><span id="weeks">00</span> нед.</div>
+      <div><span id="days">00</span> дн.</div>
+      <div><span id="hours">00</span> ч.</div>
+      <div><span id="minutes">00</span> мин.</div>
+      <div><span id="seconds">00</span> сек.</div>
+    </div>
+
+    <div class="white-card cormorant-text">
+      <p class="greeting">Дорогой Гость!</p>
+      <p class="main-text">Мы рады сообщить Вам, что 28.08.2026 состоится важное событие в нашей жизни — день нашей свадьбы!<br>
+      Приглашаем Вас разделить с нами радость этого незабываемого дня.<br>
+      <strong>28.08.2026 в 18:00 Гостевой дом "Чайковский", ул. Деметьева 51.</strong></p>
+
+      <div class="small-photo">
+        <img src="images/small_venue.jpg" alt="Место проведения">
+      </div>
+
+      <div class="love-quote-under-photo">Там, где посеяна любовь, растёт радость.</div>
+
+      <p class="main-text"><strong class="cormorant-header">Пожелания</strong><br>
+      Ваше присутствие в день нашей свадьбы - самый значимый подарок для нас!<br>
+      Мы понимаем, что дарить цветы на свадьбу - это традиция, но мы не сможем насладиться их красотой в полной мере...<br>
+      Будем рады любой другой альтернативе (желательно в денежном эквиваленте).</p>
+
+      <p class="main-text"><strong class="cormorant-header">Примечание</strong><br>
+      Будем благодарны, если вы воздержитесь от криков "Горько" на празднике, ведь поцелуй — это знак выражения чувств, он не может быть по заказу.</p>
+
+      <p class="main-text"><strong class="cormorant-header">Подтверждение</strong><br>
+      Пожалуйста, подтвердите свое присутствие до <u>01.08.2026</u>.</p>
+
+      <p class="main-text"><strong class="cormorant-header">Палитра для гостей</strong><br>
+      Будем благодарны, если при выборе нарядов на наше торжество вы придержитесь следующей палитры:</p>
+      <div class="palette">
+        <span style="background: #1B3B1B;" title="Тёмно-зелёный"></span>
+        <span style="background: #2E5A2E;" title="Зелёный лесной"></span>
+        <span style="background: #4A784A;" title="Средний зелёный"></span>
+        <span style="background: #6B9E6B;" title="Мягкий зелёный"></span>
+        <span style="background: #8FB88F;" title="Светло-зелёный"></span>
+        <span style="background: #C5E0B4;" title="Пастельный зелёный"></span>
+        <span style="background: #D3D3D3;" title="Серый"></span>
+        <span style="background: #F5DEB3;" title="Светлый бежевый"></span>
+        <span style="background: #D2B48C;" title="Тёмный бежевый"></span>
+        <span style="background: #A0522D;" title="Коричневый"></span>
+        <span style="background: #C3A343;" title="Грязно-жёлтый"></span>
+        <span style="background: #B4D4E8;" title="Небесно-голубой"></span>
+      </div>
+      <p class="small-note">Оставьте молочный и белый для невесты</p>
+
+      <p class="closing">Ждём Вас на нашей свадьбе!</p>
+
+      <!-- Предварительная форма -->
+      <form id="preRsvpForm">
+        <input type="text" id="guestName" placeholder="Ваше имя" required>
+        <select id="preAttending" required>
+          <option value="">Выберите...</option>
+          <option value="yes">Приду</option>
+          <option value="no">Не приду</option>
+        </select>
+        <button type="submit" class="small-btn">Предварительно ответить</button>
+      </form>
+      <div id="preMsg"></div>
+
+      <!-- АНКЕТА (изначально скрыта) -->
+      <div id="questionnaireBlock" style="display: none; margin-top: 30px;">
+        <h3 style="margin: 20px 0 10px;">Пожалуйста, ответьте на несколько вопросов</h3>
+        <form id="fullQuestionnaire">
+          <div class="form-group">
+            <label>Потребуется ли вам трансфер?</label>
+            <select name="transfer">
+              <option value="Нет">Нет</option>
+              <option value="Да">Да</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Какой алкоголь вы предпочитаете?</label>
+            <select name="alcohol">
+              <option value="Вино">Вино</option>
+              <option value="Шампанское">Шампанское</option>
+              <option value="Водка">Водка</option>
+              <option value="Не буду пить алкоголь">Не буду пить алкоголь</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Есть ли вам где остановиться в Казани?</label>
+            <select name="accommodation">
+              <option value="Да">Да</option>
+              <option value="Нет">Нет</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Останетесь ли вы с нами праздновать торжество на следующий день?</label>
+            <select name="nextDay">
+              <option value="Да">Да</option>
+              <option value="Нет">Нет</option>
+            </select>
+          </div>
+          <button type="submit" class="full-btn">Отправить анкету</button>
+          <div id="questionnaireMsg"></div>
+        </form>
+      </div>
+
+    </div>
+
+  </div>
+</div>
+
+<div class="dark-bg">
+  <div class="container">
+    <div class="schedule-title">Свадебное расписание</div>
+    <div class="schedule-grid">
+     <div class="schedule-item">
+  <strong>16:20</strong><br>Торжественная регистрация брака<br><small>ул. Болотникова, д.35а</small><br>
+  <span class="desc">Наша регистрация пройдет в залах ЗАГСа Кировского района. К сожалению, количество мест ограничено, поэтому приглашаем только тех, кто действительно очень хочет разделить с нами этот трогательный момент и чувствует себя бодрым после дороги.</span>
+</div>
+      <div class="schedule-item">
+        <strong>17:00</strong><br>Фуршет<br><small>Банкетный зал ул. Деметьева 51</small><br>
+        <span class="desc">Время пролетит незаметно за фуршетом и общением с другими гостями</span>
+      </div>
+      <div class="schedule-item">
+        <strong>17:30</strong><br>Фотосессия<br><small>Банкетный зал</small><br>
+        <span class="desc">До банкета у вас будет время, чтобы узнать друг друга поближе и пофотографироваться</span>
+      </div>
+      <div class="schedule-item">
+        <strong>18:00</strong><br>Праздничный банкет<br><small>Банкетный зал</small><br>
+        <span class="desc">Здесь пройдет наш праздничный банкет</span>
+      </div>
+      <div class="schedule-item">
+        <strong>23:00</strong><br>Окончание праздничного дня<br>
+        <span class="desc">Даже такой день может когда-то подойти к концу.</span>
+      </div>
+      <div class="schedule-item">
+  <strong>На следующий день</strong><br>
+  <span class="desc">Для тех, кто остаётся с нами, мы планируем продолжение праздника — неформальное семейное застолье. Будем рады всем, кто сможет разделить с нами и второй день нашей свадьбы!</span>
+</div>
+    </div>
+    <div id="map" style="height:300px; margin: 30px 0;"></div>
+  </div>
+</div>
+
+<footer>С нетерпением ждём встречи!</footer>
+
+<script src="https://api-maps.yandex.ru/2.1/?apikey=2a8507ed-e687-4126-9be0-6cdd78c97036&lang=ru_RU"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+<script src="firebase-config.js"></script>
+<script src="script.js"></script>
+</body>
+</html>
