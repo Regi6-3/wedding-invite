@@ -206,7 +206,7 @@ body {
   color: white;
   border: none;
   padding: 10px 20px;
-  border-radius: 40px;
+  border-radius: 60px;
   cursor: pointer;
   font-size: 1rem;
   font-family: 'Roboto', sans-serif;
@@ -226,24 +226,28 @@ body {
   background: #e2e2e2;
   border: none;
   padding: 5px 12px;
-  border-radius: 30px;
+  border-radius: 40px;
   cursor: pointer;
   margin-top: 10px;
 }
+
+/* ===== ДОПОЛНИТЕЛЬНЫЕ АНКЕТЫ: УБРАН ФОН, ОСТАВЛЕНЫ ТОЛЬКО ПОЛЯ ===== */
 .companion-block {
-  background: #faf8f3;
-  border-radius: 16px;
-  padding: 15px;
-  margin: 15px 0;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+  background: transparent;
+  margin: 20px 0;
+  padding: 0;
+  border: none;
+  box-shadow: none;
 }
 .companion-block h4 {
   color: #4A5D3E;
-  margin: 0 0 10px 0;
+  margin: 0 0 12px 0;
   font-family: 'Playfair Display', serif;
+  font-size: 1.3rem;
+  text-align: left;
 }
 
-/* ===== ЕДИНЫЙ СТИЛЬ ДЛЯ ВСЕХ ПОЛЕЙ (основной + близкие) ===== */
+/* ===== ОБЩИЕ СТИЛИ ДЛЯ ВСЕХ ПОЛЕЙ (скругление 16px) ===== */
 .form-group {
   margin-bottom: 20px;
   text-align: left;
@@ -255,20 +259,35 @@ body {
   font-size: 1rem;
   color: #2c3e2f;
 }
-/* Все поля внутри анкеты и блоков близких */
+/* Поля предварительной формы */
+#preRsvpForm input,
+#preRsvpForm select {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid #ccc;
+  border-radius: 16px;
+  background: #fff;
+  font-size: 1rem;
+  font-family: 'Roboto', sans-serif;
+  margin-bottom: 12px;
+  box-sizing: border-box;
+}
+/* Все поля в основной анкете и дополнительных */
 #fullQuestionnaire select,
 #fullQuestionnaire input[type="text"],
 .companion-block select,
 .companion-block input[type="text"] {
   width: 100%;
-  padding: 8px 10px;
+  padding: 10px 14px;
   border: 1px solid #ccc;
-  border-radius: 6px;
+  border-radius: 16px;
   background: #fff;
   font-size: 1rem;
   font-family: inherit;
   box-sizing: border-box;
 }
+#preRsvpForm input:focus,
+#preRsvpForm select:focus,
 #fullQuestionnaire select:focus,
 #fullQuestionnaire input:focus,
 .companion-block select:focus,
