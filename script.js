@@ -1,4 +1,4 @@
-﻿// ========== ТАЙМЕР ==========
+// ========== ТАЙМЕР ==========
 const weddingDate = new Date("August 28, 2026 18:00:00").getTime();
 function updateCountdown() {
   const now = new Date().getTime();
@@ -31,44 +31,12 @@ document.readyState === 'loading' ? document.addEventListener('DOMContentLoaded'
 
 // ========== ПРЕДВАРИТЕЛЬНЫЙ ОТВЕТ И ПОКАЗ АНКЕТЫ ==========
 let currentGuestId = null;
-let confettiFired = false; // флаг, чтобы конфетти были только один раз
 
 const preForm = document.getElementById('preRsvpForm');
 const preMsg = document.getElementById('preMsg');
 const questionnaireBlock = document.getElementById('questionnaireBlock');
 const guestNameInput = document.getElementById('guestName');
 const attendingSelect = document.getElementById('preAttending');
-
-// Функция конфетти
-function fireConfettiOnce() {
-  if (confettiFired) return;
-  confettiFired = true;
-  const colors = ['#FFD700', '#FF69B4', '#FFFFFF', '#9B6B5C', '#C5E0B4'];
-  for (let i = 0; i < 180; i++) {
-    const confetto = document.createElement('div');
-    confetto.style.position = 'fixed';
-    confetto.style.width = Math.random() * 10 + 5 + 'px';
-    confetto.style.height = Math.random() * 10 + 5 + 'px';
-    confetto.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
-    confetto.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
-    confetto.style.left = Math.random() * window.innerWidth + 'px';
-    confetto.style.top = '-20px';
-    confetto.style.zIndex = '9999';
-    confetto.style.pointerEvents = 'none';
-    confetto.style.opacity = Math.random() * 0.8 + 0.3;
-    confetto.style.animation = `fall ${Math.random() * 2 + 2}s linear forwards`;
-    document.body.appendChild(confetto);
-    setTimeout(() => confetto.remove(), 3000);
-  }
-}
-
-// Добавляем анимацию падения, если её ещё нет
-if (!document.querySelector('#confetti-style')) {
-  const style = document.createElement('style');
-  style.id = 'confetti-style';
-  style.textContent = `@keyframes fall { 0% { transform: translateY(0) rotate(0deg); opacity: 1; } 100% { transform: translateY(100vh) rotate(360deg); opacity: 0; } }`;
-  document.head.appendChild(style);
-}
 
 preForm.addEventListener('submit', async (e) => {
   e.preventDefault();
@@ -93,17 +61,81 @@ preForm.addEventListener('submit', async (e) => {
     
     if (attendingBool) {
       questionnaireBlock.style.display = 'block';
-      fireConfettiOnce(); // конфетти только при положительном ответе
     } else {
       questionnaireBlock.style.display = 'none';
     }
-    // Блокируем повторную отправку предварительной формы
     guestNameInput.disabled = true;
     attendingSelect.disabled = true;
   } catch(err) {
     preMsg.innerText = 'Ошибка: ' + err.message;
     preMsg.style.color = 'red';
   }
+});
+
+// ========== ДИНАМИЧЕСКОЕ ДОБАВЛЕНИЕ БЛИЗКИХ ==========
+const companionsContainer = document.getElementById('companionsContainer');
+const addCompanionBtn = document.getElementById('addCompanionBtn');
+
+function createCompanionBlock(index) {
+  const div = document.createElement('div');
+  div.className = 'companion-block';
+  div.setAttribute('data-index', index);
+  div.innerHTML = `
+    <h4>Близкий человек ${index+1}</h4>
+    <div class="form-group">
+      <label>Имя</label>
+      <input type="text" name="companionName_${index}" placeholder="Имя гостя">
+    </div>
+    <div class="form-group">
+      <label>Потребуется трансфер?</label>
+      <select name="companionTransfer_${index}">
+        <option value="Нет">Нет</option>
+        <option value="Да">Да</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Алкоголь</label>
+      <select name="companionAlcohol_${index}">
+        <option value="Вино">Вино</option>
+        <option value="Шампанское">Шампанское</option>
+        <option value="Водка">Водка</option>
+        <option value="Не буду пить алкоголь">Не буду пить алкоголь</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Остановка в Казани</label>
+      <select name="companionAccommodation_${index}">
+        <option value="Да">Да</option>
+        <option value="Нет">Нет</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Останется на следующий день?</label>
+      <select name="companionNextDay_${index}">
+        <option value="Да">Да</option>
+        <option value="Нет">Нет</option>
+      </select>
+    </div>
+    <button type="button" class="remove-companion">Удалить</button>
+  `;
+  div.querySelector('.remove-companion').addEventListener('click', () => {
+    div.remove();
+    // перенумеровать оставшиеся блоки (не обязательно, но для чистоты)
+    document.querySelectorAll('.companion-block').forEach((block, idx) => {
+      block.setAttribute('data-index', idx);
+      const h4 = block.querySelector('h4');
+      if (h4) h4.innerText = `Близкий человек ${idx+1}`;
+      // можно также переименовать поля, но для отправки достаточно уникальности
+    });
+  });
+  return div;
+}
+
+let companionCounter = 0;
+addCompanionBtn.addEventListener('click', () => {
+  const newBlock = createCompanionBlock(companionCounter);
+  companionsContainer.appendChild(newBlock);
+  companionCounter++;
 });
 
 // ========== ОТПРАВКА АНКЕТЫ ==========
@@ -117,6 +149,8 @@ fullForm.addEventListener('submit', async (e) => {
     qMsg.style.color = 'red';
     return;
   }
+
+  // Основные данные
   const formData = {
     transfer: fullForm.transfer.value,
     alcohol: fullForm.alcohol.value,
@@ -124,13 +158,41 @@ fullForm.addEventListener('submit', async (e) => {
     nextDay: fullForm.nextDay.value,
     questionnaireTimestamp: firebase.firestore.FieldValue.serverTimestamp()
   };
+
+  // Сбор данных о близких
+  const companions = [];
+  document.querySelectorAll('.companion-block').forEach((block, idx) => {
+    const nameInput = block.querySelector(`input[name^="companionName"]`);
+    const transferSelect = block.querySelector(`select[name^="companionTransfer"]`);
+    const alcoholSelect = block.querySelector(`select[name^="companionAlcohol"]`);
+    const accommodationSelect = block.querySelector(`select[name^="companionAccommodation"]`);
+    const nextDaySelect = block.querySelector(`select[name^="companionNextDay"]`);
+    if (nameInput && nameInput.value.trim()) {
+      companions.push({
+        name: nameInput.value.trim(),
+        transfer: transferSelect ? transferSelect.value : 'Нет',
+        alcohol: alcoholSelect ? alcoholSelect.value : 'Не буду пить алкоголь',
+        accommodation: accommodationSelect ? accommodationSelect.value : 'Нет',
+        nextDay: nextDaySelect ? nextDaySelect.value : 'Нет'
+      });
+    }
+  });
+  if (companions.length > 0) {
+    formData.companions = companions;
+  }
+
   try {
     await db.collection("guests").doc(currentGuestId).update(formData);
     qMsg.innerText = 'Анкета отправлена! Спасибо.';
     qMsg.style.color = 'green';
     fullForm.reset();
-    // Опционально: скрыть анкету после отправки
-    // questionnaireBlock.style.display = 'none';
+    // Очистить контейнер с близкими, сбросить счётчик
+    companionsContainer.innerHTML = '';
+    companionCounter = 0;
+    questionnaireBlock.style.display = 'none'; // скрываем анкету после отправки
+
+    // КОНФЕТТИ только при положительном ответе
+    fireConfetti();
   } catch(err) {
     qMsg.innerText = 'Ошибка: ' + err.message;
     qMsg.style.color = 'red';
@@ -165,3 +227,30 @@ musicBtn.onclick = () => {
   }
   playing = !playing;
 };
+
+// ========== КОНФЕТТИ (своя реализация) ==========
+function fireConfetti() {
+  const colors = ['#FFD700', '#FF69B4', '#FFFFFF', '#9B6B5C', '#C5E0B4'];
+  for (let i = 0; i < 120; i++) {
+    const confetto = document.createElement('div');
+    confetto.style.position = 'fixed';
+    confetto.style.width = Math.random() * 8 + 4 + 'px';
+    confetto.style.height = Math.random() * 8 + 4 + 'px';
+    confetto.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+    confetto.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
+    confetto.style.left = Math.random() * window.innerWidth + 'px';
+    confetto.style.top = '-20px';
+    confetto.style.zIndex = '9999';
+    confetto.style.pointerEvents = 'none';
+    confetto.style.opacity = Math.random() * 0.8 + 0.3;
+    confetto.style.animation = `fall ${Math.random() * 2 + 2}s linear forwards`;
+    document.body.appendChild(confetto);
+    setTimeout(() => confetto.remove(), 3000);
+  }
+}
+if (!document.querySelector('#confetti-style')) {
+  const style = document.createElement('style');
+  style.id = 'confetti-style';
+  style.textContent = `@keyframes fall { 0% { transform: translateY(0) rotate(0deg); opacity: 1; } 100% { transform: translateY(100vh) rotate(360deg); opacity: 0; } }`;
+  document.head.appendChild(style);
+}
