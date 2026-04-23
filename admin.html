@@ -5,199 +5,63 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Админка свадьбы</title>
   <style>
-    body {
-      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-      background: #f0f2f5;
-      margin: 0;
-      padding: 20px;
-    }
-    .container {
-      max-width: 1200px;
-      margin: 0 auto;
-    }
-    h1 {
-      color: #4A5D3E;
-      border-left: 5px solid #9B6B5C;
-      padding-left: 16px;
-      margin-bottom: 24px;
-    }
-    .guest-card {
-      background: white;
-      border-radius: 20px;
-      padding: 20px;
-      margin-bottom: 24px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-      transition: 0.2s;
-    }
-    .guest-card:hover {
-      box-shadow: 0 8px 20px rgba(0,0,0,0.12);
-    }
-    .guest-name {
-      font-size: 1.5rem;
-      font-weight: 600;
-      color: #2c3e2f;
-      margin: 0 0 8px 0;
-    }
-    .attending {
-      display: inline-block;
-      padding: 4px 12px;
-      border-radius: 40px;
-      font-size: 0.85rem;
-      font-weight: 500;
-      margin-bottom: 16px;
-    }
-    .attending-yes {
-      background: #e0f2e9;
-      color: #1e6f3f;
-    }
-    .attending-no {
-      background: #ffe6e5;
-      color: #b33;
-    }
-    .guest-date {
-      font-size: 0.8rem;
-      color: #666;
-      margin-bottom: 16px;
-    }
-    h3 {
-      font-size: 1.1rem;
-      font-weight: 600;
-      color: #4A5D3E;
-      margin: 16px 0 8px 0;
-      border-bottom: 1px solid #eee;
-      padding-bottom: 4px;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin: 12px 0;
-      background: #fefefe;
-      border-radius: 16px;
-      overflow: hidden;
-    }
-    th, td {
-      padding: 10px 12px;
-      text-align: left;
-      border-bottom: 1px solid #e2e2e2;
-    }
-    th {
-      background: #f3f1ea;
-      font-weight: 600;
-      color: #2c3e2f;
-    }
-    .companions-table {
-      background: #faf8f3;
-      margin-top: 8px;
-    }
-    .empty {
-      color: #999;
-      font-style: italic;
-      padding: 12px;
-      background: #f9f9f9;
-      border-radius: 12px;
-    }
-    footer {
-      margin-top: 40px;
-      text-align: center;
-      font-size: 0.8rem;
-      color: #888;
-    }
+    body { font-family: system-ui; background: #f0f2f5; padding: 20px; }
+    .guest-card { background: white; border-radius: 20px; padding: 20px; margin-bottom: 24px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+    .guest-name { font-size: 1.5rem; font-weight: bold; color: #2c3e2f; }
+    .attending { display: inline-block; padding: 4px 12px; border-radius: 40px; font-size: 0.85rem; margin: 8px 0; }
+    .attending-yes { background: #e0f2e9; color: #1e6f3f; }
+    .attending-no { background: #ffe6e5; color: #b33; }
+    .guest-date { font-size: 0.8rem; color: #666; margin-bottom: 16px; }
+    h3 { font-size: 1.1rem; margin: 16px 0 8px; color: #4A5D3E; border-bottom: 1px solid #eee; }
+    table { width: 100%; border-collapse: collapse; background: #fefefe; }
+    th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid #e2e2e2; }
+    th { background: #f3f1ea; }
+    .companions-table { background: #faf8f3; margin-top: 8px; }
+    .empty { color: #999; font-style: italic; padding: 12px; background: #f9f9f9; border-radius: 12px; }
   </style>
 </head>
 <body>
-<div class="container">
-  <h1>📋 Все ответы гостей</h1>
-  <div id="allGuests">Загрузка...</div>
-  <footer>Данные обновляются в реальном времени</footer>
-</div>
-
+<h1>Все ответы гостей</h1>
+<div id="allGuests">Загрузка...</div>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 <script src="firebase-config.js"></script>
 <script>
-  function escapeHtml(str) {
-    if (str === undefined || str === null) return '';
-    return String(str).replace(/[&<>]/g, function(m) {
-      if (m === '&') return '&amp;';
-      if (m === '<') return '&lt;';
-      if (m === '>') return '&gt;';
-      return m;
-    });
-  }
-
-  function formatDate(timestamp) {
-    if (!timestamp || !timestamp.toDate) return '—';
-    return timestamp.toDate().toLocaleString('ru-RU', {
-      day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit'
-    });
-  }
-
+  function escapeHtml(str) { return str ? String(str).replace(/[&<>]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[m])) : ''; }
+  function formatDate(ts) { return ts?.toDate().toLocaleString() || '—'; }
   async function loadAllGuests() {
     const container = document.getElementById('allGuests');
     try {
       const snapshot = await db.collection("guests").orderBy("timestamp", "desc").get();
-      if (snapshot.empty) {
-        container.innerHTML = '<div class="empty">Пока нет ответов 😢</div>';
-        return;
-      }
-
+      if (snapshot.empty) { container.innerHTML = '<div class="empty">Нет ответов</div>'; return; }
       let html = '';
       snapshot.forEach(doc => {
         const d = doc.data();
         const attendingClass = d.attending ? 'attending-yes' : 'attending-no';
         const attendingText = d.attending ? '✅ Придёт' : '❌ Не придёт';
-
-        html += `
-          <div class="guest-card">
-            <div class="guest-name">${escapeHtml(d.name)}</div>
-            <div class="attending ${attendingClass}">${attendingText}</div>
-            <div class="guest-date">📅 ${formatDate(d.timestamp)}</div>
-
-            <h3>🎯 Основной гость</h3>
-            <table>
-              <thead>
-                <tr><th>Трансфер</th><th>Алкоголь</th><th>Остановка в Казани</th><th>Останется на след. день</th></tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td>${escapeHtml(d.transfer || '—')}</td>
-                  <td>${escapeHtml(d.alcohol || '—')}</td>
-                  <td>${escapeHtml(d.accommodation || '—')}</td>
-                  <td>${escapeHtml(d.nextDay || '—')}</td>
-                </tr>
-              </tbody>
-            </table>
-        `;
-
-        // Близкие люди
-        if (d.companions && d.companions.length > 0) {
-          html += `<h3>👥 Близкие (${d.companions.length})</h3>`;
-          html += `<table class="companions-table">
-            <thead><tr><th>Имя</th><th>Трансфер</th><th>Алкоголь</th><th>Остановка</th><th>След. день</th></tr></thead>
-            <tbody>`;
+        html += `<div class="guest-card">
+          <div class="guest-name">${escapeHtml(d.name)}</div>
+          <div class="attending ${attendingClass}">${attendingText}</div>
+          <div class="guest-date">📅 ${formatDate(d.timestamp)}</div>
+          <h3>Основной гость</h3>
+          <table><thead><tr><th>Трансфер</th><th>Алкоголь</th><th>Остановка</th><th>След. день</th></tr></thead><tbody>
+          <tr><td>${escapeHtml(d.transfer)}</td><td>${escapeHtml(d.alcohol)}</td><td>${escapeHtml(d.accommodation)}</td><td>${escapeHtml(d.nextDay)}</td></tr>
+          </tbody></table>`;
+        if (d.companions && d.companions.length) {
+          html += `<h3>Близкие (${d.companions.length})</h3>
+          <table class="companions-table"><thead><tr><th>Имя</th><th>Трансфер</th><th>Алкоголь</th><th>Остановка</th><th>След. день</th></tr></thead><tbody>`;
           d.companions.forEach(c => {
-            html += `<tr>
-              <td>${escapeHtml(c.name)}</td>
-              <td>${escapeHtml(c.transfer)}</td>
-              <td>${escapeHtml(c.alcohol)}</td>
-              <td>${escapeHtml(c.accommodation)}</td>
-              <td>${escapeHtml(c.nextDay)}</td>
-            </tr>`;
+            html += `<tr><td>${escapeHtml(c.name)}</td><td>${escapeHtml(c.transfer)}</td><td>${escapeHtml(c.alcohol)}</td><td>${escapeHtml(c.accommodation)}</td><td>${escapeHtml(c.nextDay)}</td></tr>`;
           });
           html += `</tbody></table>`;
         } else {
-          html += `<div class="empty" style="margin-top: 8px;">Нет добавленных близких</div>`;
+          html += `<div class="empty">Нет добавленных близких</div>`;
         }
-
         html += `</div>`;
       });
       container.innerHTML = html;
-    } catch (err) {
-      console.error(err);
-      container.innerHTML = `<div class="empty">Ошибка загрузки: ${err.message}</div>`;
-    }
+    } catch(e) { container.innerHTML = `<div class="empty">Ошибка: ${e.message}</div>`; }
   }
-
   loadAllGuests();
 </script>
 </body>
