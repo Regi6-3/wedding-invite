@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', function() {
-  // Таймер
+  // ========== ТАЙМЕР ==========
   const weddingDate = new Date("August 28, 2026 18:00:00").getTime();
   function updateCountdown() {
     const now = new Date().getTime();
@@ -16,9 +16,10 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById("minutes").innerText = minutes < 10 ? "0"+minutes : minutes;
     document.getElementById("seconds").innerText = seconds < 10 ? "0"+seconds : seconds;
   }
-  setInterval(updateCountdown, 1000); updateCountdown();
+  setInterval(updateCountdown, 1000);
+  updateCountdown();
 
-  // Карта
+  // ========== КАРТА ==========
   function initMap() {
     if (typeof ymaps === 'undefined') return;
     ymaps.ready(() => {
@@ -26,9 +27,10 @@ document.addEventListener('DOMContentLoaded', function() {
       myMap.geoObjects.add(new ymaps.Placemark([55.865728, 49.108624], { balloonContent: "Банкетный зал 'Чайковский', ул. Деметьева, 51, Казань" }));
     });
   }
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initMap); else initMap();
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initMap);
+  else initMap();
 
-  // Предварительный ответ
+  // ========== ПРЕДВАРИТЕЛЬНЫЙ ОТВЕТ ==========
   let currentGuestId = null;
   const preForm = document.getElementById('preRsvpForm');
   const preMsg = document.getElementById('preMsg');
@@ -63,36 +65,37 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 
-  // Добавление близких
+  // ========== ДОБАВЛЕНИЕ АНКЕТ (начиная с Анкеты 2) ==========
   const companionsContainer = document.getElementById('companionsContainer');
-  let companionCounter = 0;
+  let companionCounter = 2; // нумерация начинается с 2, т.к. основная анкета - это Анкета 1
+
   function createCompanionBlock(index) {
     const div = document.createElement('div');
     div.className = 'companion-block';
-    div.style.border = '1px solid #ccc';
-    div.style.padding = '10px';
-    div.style.margin = '10px 0';
     div.innerHTML = `
-      <h4>Близкий человек ${index+1}</h4>
-      <div><label>Имя</label><br><input type="text" name="cname_${index}" placeholder="Имя" required></div>
-      <div><label>Трансфер</label><br><select name="ctransfer_${index}"><option value="Нет">Нет</option><option value="Да">Да</option></select></div>
-      <div><label>Алкоголь</label><br><select name="calcohol_${index}"><option value="Вино">Вино</option><option value="Шампанское">Шампанское</option><option value="Водка">Водка</option><option value="Не буду пить алкоголь">Не буду пить алкоголь</option></select></div>
-      <div><label>Остановка в Казани</label><br><select name="caccom_${index}"><option value="Да">Да</option><option value="Нет">Нет</option></select></div>
-      <div><label>Останется на след. день?</label><br><select name="cnext_${index}"><option value="Да">Да</option><option value="Нет">Нет</option></select></div>
-      <button type="button" class="remove-companion" style="margin-top:8px;">Удалить</button>
+      <h4>Анкета ${index}</h4>
+      <div class="form-group"><label>Имя</label><input type="text" name="cname_${index}" placeholder="Имя гостя" required></div>
+      <div class="form-group"><label>Трансфер</label><select name="ctransfer_${index}"><option value="Нет">Нет</option><option value="Да">Да</option></select></div>
+      <div class="form-group"><label>Алкоголь</label><select name="calcohol_${index}"><option value="Вино">Вино</option><option value="Шампанское">Шампанское</option><option value="Водка">Водка</option><option value="Не буду пить алкоголь">Не буду пить алкоголь</option></select></div>
+      <div class="form-group"><label>Остановка в Казани</label><select name="caccom_${index}"><option value="Да">Да</option><option value="Нет">Нет</option></select></div>
+      <div class="form-group"><label>Останется на след. день?</label><select name="cnext_${index}"><option value="Да">Да</option><option value="Нет">Нет</option></select></div>
+      <button type="button" class="remove-companion"><i class="fas fa-trash-alt"></i> Удалить анкету</button>
     `;
     div.querySelector('.remove-companion').addEventListener('click', () => div.remove());
     return div;
   }
+
   document.body.addEventListener('click', (e) => {
     if (e.target && e.target.id === 'addCompanionBtn') {
       if (companionsContainer) {
-        companionsContainer.appendChild(createCompanionBlock(companionCounter++));
+        const newBlock = createCompanionBlock(companionCounter);
+        companionsContainer.appendChild(newBlock);
+        companionCounter++;
       }
     }
   });
 
-  // Отправка анкеты (создаём подколлекцию companions)
+  // ========== ОТПРАВКА АНКЕТЫ (сохраняем в подколлекцию companions) ==========
   const fullForm = document.getElementById('fullQuestionnaire');
   const qMsg = document.getElementById('questionnaireMsg');
   if (fullForm) {
@@ -103,8 +106,7 @@ document.addEventListener('DOMContentLoaded', function() {
         qMsg.style.color = 'red';
         return;
       }
-      // Основные данные
-      const mainData = {
+      const formData = {
         transfer: fullForm.transfer.value,
         alcohol: fullForm.alcohol.value,
         accommodation: fullForm.accommodation.value,
@@ -112,38 +114,41 @@ document.addEventListener('DOMContentLoaded', function() {
         questionnaireTimestamp: firebase.firestore.FieldValue.serverTimestamp()
       };
       try {
-        await db.collection("guests").doc(currentGuestId).update(mainData);
-        // Сохраняем каждого близкого в подколлекцию
-        const blocks = document.querySelectorAll('.companion-block');
-        for (let block of blocks) {
+        await db.collection("guests").doc(currentGuestId).update(formData);
+        const guestRef = db.collection("guests").doc(currentGuestId);
+        const companions = [];
+        document.querySelectorAll('.companion-block').forEach(block => {
           const nameInput = block.querySelector('input[type="text"]');
           if (nameInput && nameInput.value.trim()) {
-            const compData = {
+            companions.push({
               name: nameInput.value.trim(),
               transfer: block.querySelector('select[name^="ctransfer"]')?.value || 'Нет',
               alcohol: block.querySelector('select[name^="calcohol"]')?.value || 'Не буду пить алкоголь',
               accommodation: block.querySelector('select[name^="caccom"]')?.value || 'Нет',
               nextDay: block.querySelector('select[name^="cnext"]')?.value || 'Нет',
               timestamp: firebase.firestore.FieldValue.serverTimestamp()
-            };
-            await db.collection("guests").doc(currentGuestId).collection("companions").add(compData);
+            });
           }
+        });
+        for (let comp of companions) {
+          await guestRef.collection("companions").add(comp);
         }
         qMsg.innerText = 'Анкета отправлена! Спасибо.';
         qMsg.style.color = 'green';
         fullForm.reset();
         companionsContainer.innerHTML = '';
-        companionCounter = 0;
+        companionCounter = 2; // сброс счётчика
         questionnaireBlock.style.display = 'none';
         fireConfetti();
       } catch(err) {
         qMsg.innerText = 'Ошибка: ' + err.message;
         qMsg.style.color = 'red';
+        console.error(err);
       }
     });
   }
 
-  // Календарь
+  // ========== КАЛЕНДАРЬ ==========
   document.getElementById('addToCalendarBtn')?.addEventListener('click', () => {
     const start = new Date(2026,7,28,18,0,0);
     const end = new Date(2026,7,28,23,0,0);
@@ -157,7 +162,7 @@ document.addEventListener('DOMContentLoaded', function() {
     URL.revokeObjectURL(link.href);
   });
 
-  // Музыка
+  // ========== МУЗЫКА ==========
   const audio = document.getElementById('weddingAudio');
   const musicBtn = document.getElementById('playMusicBtn');
   if (audio && musicBtn) {
@@ -169,7 +174,7 @@ document.addEventListener('DOMContentLoaded', function() {
     };
   }
 
-  // Конфетти
+  // ========== КОНФЕТТИ ==========
   function fireConfetti() {
     const colors = ['#FFD700','#FF69B4','#FFFFFF','#9B6B5C','#C5E0B4'];
     for(let i=0; i<120; i++) {
