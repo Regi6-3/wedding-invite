@@ -71,7 +71,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 
-  // ========== ДОБАВЛЕНИЕ БЛИЗКИХ (через делегирование) ==========
+  // ========== ДОБАВЛЕНИЕ БЛИЗКИХ ==========
   const companionsContainer = document.getElementById('companionsContainer');
   let companionCounter = 0;
 
@@ -126,17 +126,15 @@ document.addEventListener('DOMContentLoaded', function() {
     return div;
   }
 
-  // Делегирование события на весь документ
   document.body.addEventListener('click', function(e) {
     if (e.target && e.target.id === 'addCompanionBtn') {
-      console.log('Кнопка добавления нажата');
       const newBlock = createCompanionBlock(companionCounter);
       if (companionsContainer) companionsContainer.appendChild(newBlock);
       companionCounter++;
     }
   });
 
-  // ========== ОТПРАВКА АНКЕТЫ ==========
+  // ========== ОТПРАВКА АНКЕТЫ (с companions) ==========
   const fullForm = document.getElementById('fullQuestionnaire');
   const qMsg = document.getElementById('questionnaireMsg');
   if (fullForm) {
@@ -147,6 +145,8 @@ document.addEventListener('DOMContentLoaded', function() {
         qMsg.style.color = 'red';
         return;
       }
+
+      // Основные данные
       const formData = {
         transfer: fullForm.transfer.value,
         alcohol: fullForm.alcohol.value,
@@ -154,8 +154,11 @@ document.addEventListener('DOMContentLoaded', function() {
         nextDay: fullForm.nextDay.value,
         questionnaireTimestamp: firebase.firestore.FieldValue.serverTimestamp()
       };
+
+      // Сбор данных о близких
       const companions = [];
-      document.querySelectorAll('.companion-block').forEach((block) => {
+      const blocks = document.querySelectorAll('.companion-block');
+      blocks.forEach((block) => {
         const nameInput = block.querySelector('input[type="text"]');
         if (nameInput && nameInput.value.trim()) {
           companions.push({
@@ -167,7 +170,12 @@ document.addEventListener('DOMContentLoaded', function() {
           });
         }
       });
-      if (companions.length) formData.companions = companions;
+      if (companions.length > 0) {
+        formData.companions = companions;
+      } else {
+        // Если нет близких, явно устанавливаем пустой массив или не сохраняем? Лучше не сохранять поле.
+        // Но для единообразия - оставляем как есть.
+      }
 
       try {
         await db.collection("guests").doc(currentGuestId).update(formData);
