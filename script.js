@@ -1,4 +1,3 @@
-// ========== ОЖИДАНИЕ ЗАГРУЗКИ DOM ==========
 document.addEventListener('DOMContentLoaded', function() {
 
   // ========== ТАЙМЕР ==========
@@ -12,7 +11,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const hours = Math.floor((distance % (86400000)) / 3600000);
     const minutes = Math.floor((distance % 3600000) / 60000);
     const seconds = Math.floor((distance % 60000) / 1000);
-    
     document.getElementById("weeks").innerText = weeks < 10 ? "0" + weeks : weeks;
     document.getElementById("days").innerText = days < 10 ? "0" + days : days;
     document.getElementById("hours").innerText = hours < 10 ? "0" + hours : hours;
@@ -30,11 +28,11 @@ document.addEventListener('DOMContentLoaded', function() {
       myMap.geoObjects.add(new ymaps.Placemark([55.865728, 49.108624], { balloonContent: "Банкетный зал 'Чайковский', ул. Деметьева, 51, Казань" }));
     });
   }
-  document.readyState === 'loading' ? document.addEventListener('DOMContentLoaded', initMap) : initMap();
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initMap);
+  else initMap();
 
-  // ========== ПРЕДВАРИТЕЛЬНЫЙ ОТВЕТ И ПОКАЗ АНКЕТЫ ==========
+  // ========== ПРЕДВАРИТЕЛЬНЫЙ ОТВЕТ ==========
   let currentGuestId = null;
-
   const preForm = document.getElementById('preRsvpForm');
   const preMsg = document.getElementById('preMsg');
   const questionnaireBlock = document.getElementById('questionnaireBlock');
@@ -62,12 +60,8 @@ document.addEventListener('DOMContentLoaded', function() {
         currentGuestId = docRef.id;
         preMsg.innerText = 'Спасибо, ' + guestName + '! Ваш ответ сохранён.';
         preMsg.style.color = 'green';
-        
-        if (attendingBool) {
-          questionnaireBlock.style.display = 'block';
-        } else {
-          questionnaireBlock.style.display = 'none';
-        }
+        if (attendingBool) questionnaireBlock.style.display = 'block';
+        else questionnaireBlock.style.display = 'none';
         guestNameInput.disabled = true;
         attendingSelect.disabled = true;
       } catch(err) {
@@ -77,10 +71,8 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 
-  // ========== ДИНАМИЧЕСКОЕ ДОБАВЛЕНИЕ БЛИЗКИХ ==========
+  // ========== ДОБАВЛЕНИЕ БЛИЗКИХ (через делегирование) ==========
   const companionsContainer = document.getElementById('companionsContainer');
-  const addCompanionBtn = document.getElementById('addCompanionBtn');
-  
   let companionCounter = 0;
 
   function createCompanionBlock(index) {
@@ -94,7 +86,7 @@ document.addEventListener('DOMContentLoaded', function() {
         <input type="text" name="companionName_${index}" placeholder="Имя гостя" required>
       </div>
       <div class="form-group">
-        <label>Потребуется трансфер?</label>
+        <label>Трансфер</label>
         <select name="companionTransfer_${index}">
           <option value="Нет">Нет</option>
           <option value="Да">Да</option>
@@ -117,7 +109,7 @@ document.addEventListener('DOMContentLoaded', function() {
         </select>
       </div>
       <div class="form-group">
-        <label>Останется на следующий день?</label>
+        <label>Останется на след. день?</label>
         <select name="companionNextDay_${index}">
           <option value="Да">Да</option>
           <option value="Нет">Нет</option>
@@ -125,10 +117,8 @@ document.addEventListener('DOMContentLoaded', function() {
       </div>
       <button type="button" class="remove-companion">Удалить</button>
     `;
-    const removeBtn = div.querySelector('.remove-companion');
-    removeBtn.addEventListener('click', () => {
+    div.querySelector('.remove-companion').addEventListener('click', () => {
       div.remove();
-      // перенумерация заголовков (необязательно)
       document.querySelectorAll('.companion-block').forEach((block, idx) => {
         block.querySelector('h4').innerText = `Близкий человек ${idx+1}`;
       });
@@ -136,18 +126,19 @@ document.addEventListener('DOMContentLoaded', function() {
     return div;
   }
 
-  if (addCompanionBtn) {
-    addCompanionBtn.addEventListener('click', () => {
+  // Делегирование события на весь документ
+  document.body.addEventListener('click', function(e) {
+    if (e.target && e.target.id === 'addCompanionBtn') {
+      console.log('Кнопка добавления нажата');
       const newBlock = createCompanionBlock(companionCounter);
-      companionsContainer.appendChild(newBlock);
+      if (companionsContainer) companionsContainer.appendChild(newBlock);
       companionCounter++;
-    });
-  }
+    }
+  });
 
   // ========== ОТПРАВКА АНКЕТЫ ==========
   const fullForm = document.getElementById('fullQuestionnaire');
   const qMsg = document.getElementById('questionnaireMsg');
-
   if (fullForm) {
     fullForm.addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -156,8 +147,6 @@ document.addEventListener('DOMContentLoaded', function() {
         qMsg.style.color = 'red';
         return;
       }
-
-      // Основные данные
       const formData = {
         transfer: fullForm.transfer.value,
         alcohol: fullForm.alcohol.value,
@@ -165,40 +154,29 @@ document.addEventListener('DOMContentLoaded', function() {
         nextDay: fullForm.nextDay.value,
         questionnaireTimestamp: firebase.firestore.FieldValue.serverTimestamp()
       };
-
-      // Сбор данных о близких
       const companions = [];
       document.querySelectorAll('.companion-block').forEach((block) => {
         const nameInput = block.querySelector('input[type="text"]');
-        const transferSelect = block.querySelector('select[name^="companionTransfer"]');
-        const alcoholSelect = block.querySelector('select[name^="companionAlcohol"]');
-        const accommodationSelect = block.querySelector('select[name^="companionAccommodation"]');
-        const nextDaySelect = block.querySelector('select[name^="companionNextDay"]');
         if (nameInput && nameInput.value.trim()) {
           companions.push({
             name: nameInput.value.trim(),
-            transfer: transferSelect ? transferSelect.value : 'Нет',
-            alcohol: alcoholSelect ? alcoholSelect.value : 'Не буду пить алкоголь',
-            accommodation: accommodationSelect ? accommodationSelect.value : 'Нет',
-            nextDay: nextDaySelect ? nextDaySelect.value : 'Нет'
+            transfer: block.querySelector('select[name^="companionTransfer"]')?.value || 'Нет',
+            alcohol: block.querySelector('select[name^="companionAlcohol"]')?.value || 'Не буду пить алкоголь',
+            accommodation: block.querySelector('select[name^="companionAccommodation"]')?.value || 'Нет',
+            nextDay: block.querySelector('select[name^="companionNextDay"]')?.value || 'Нет'
           });
         }
       });
-      if (companions.length > 0) {
-        formData.companions = companions;
-      }
+      if (companions.length) formData.companions = companions;
 
       try {
         await db.collection("guests").doc(currentGuestId).update(formData);
         qMsg.innerText = 'Анкета отправлена! Спасибо.';
         qMsg.style.color = 'green';
         fullForm.reset();
-        // Очистить контейнер с близкими
         if (companionsContainer) companionsContainer.innerHTML = '';
         companionCounter = 0;
         if (questionnaireBlock) questionnaireBlock.style.display = 'none';
-
-        // КОНФЕТТИ
         fireConfetti();
       } catch(err) {
         qMsg.innerText = 'Ошибка: ' + err.message;
@@ -268,4 +246,4 @@ document.addEventListener('DOMContentLoaded', function() {
     document.head.appendChild(style);
   }
 
-}); // конец DOMContentLoaded
+});
