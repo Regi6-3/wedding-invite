@@ -6,19 +6,17 @@
   <style>
     body { font-family: Arial; padding: 20px; background: #f0f5f0; }
     .card { background: white; border-radius: 20px; padding: 20px; margin-bottom: 25px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-    .name { font-size: 1.8rem; font-weight: bold; color: #6b4c3b; }
+    .name { font-size: 1.5rem; font-weight: bold; }
     .status { display: inline-block; background: #6b4c3b; color: white; padding: 5px 12px; border-radius: 30px; font-size: 0.8rem; }
-    .date { color: gray; font-size: 0.8rem; margin-top: 5px; }
     table { width: 100%; border-collapse: collapse; margin-top: 15px; }
     th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
     th { background: #d9e0d9; }
-    h3 { color: #6b4c3b; margin-top: 20px; }
+    h3 { color: #6b4c3b; }
   </style>
 </head>
 <body>
-<h1>📋 Все ответы гостей</h1>
+<h1>Все гости</h1>
 <div id="list">Загрузка...</div>
-
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 <script src="firebase-config.js"></script>
@@ -27,33 +25,36 @@
     const div = document.getElementById('list');
     try {
       const snapshot = await db.collection("guests").orderBy("timestamp", "desc").get();
-      if (snapshot.empty) { div.innerHTML = '<p>Пока нет ответов</p>'; return; }
+      if (snapshot.empty) {
+        div.innerHTML = '<p>Нет ответов</p>';
+        return;
+      }
       let html = '';
-      for (const doc of snapshot.docs) {
+      snapshot.forEach(doc => {
         const g = doc.data();
-        const stat = g.attending ? '✅ Придёт' : '❌ Не придёт';
         html += `<div class="card">
-          <div class="name">${g.name || '?'}</div>
-          <div><span class="status">${stat}</span></div>
-          <div class="date">📅 ${g.timestamp?.toDate().toLocaleString() || '—'}</div>
+          <div class="name">${g.name || 'Имя не указано'}</div>
+          <div><span class="status">${g.attending ? 'Придёт' : 'Не придёт'}</span></div>
+          <div>Дата: ${g.timestamp?.toDate().toLocaleString() || '—'}</div>
           <h3>Основной гость</h3>
           <table><tr><th>Трансфер</th><th>Алкоголь</th><th>Остановка</th><th>След. день</th></tr>
           <tr><td>${g.transfer || '—'}</td><td>${g.alcohol || '—'}</td><td>${g.accommodation || '—'}</td><td>${g.nextDay || '—'}</td></tr></table>`;
-        
-        if (g.companions && g.companions.length > 0) {
-          html += `<h3>👥 +${g.companions.length} близких</h3>`;
-          html += `<table><tr><th>Имя</th><th>Трансфер</th><th>Алкоголь</th><th>Остановка</th><th>След. день</th></tr>`;
-          for (let c of g.companions) {
-            html += `<tr><td><b>${c.name || '?'}</b></td><td>${c.transfer || '—'}</td><td>${c.alcohol || '—'}</td><td>${c.accommodation || '—'}</td><td>${c.nextDay || '—'}</td></tr>`;
-          }
+        if (g.companions && Array.isArray(g.companions) && g.companions.length > 0) {
+          html += `<h3>Близкие (${g.companions.length})</h3><table><tr><th>Имя</th><th>Трансфер</th><th>Алкоголь</th><th>Остановка</th><th>След. день</th></tr>`;
+          g.companions.forEach(c => {
+            html += `<tr><td>${c.name || '?'}</td><td>${c.transfer || '—'}</td><td>${c.alcohol || '—'}</td><td>${c.accommodation || '—'}</td><td>${c.nextDay || '—'}</td></tr>`;
+          });
           html += `</table>`;
         } else {
-          html += `<p style="color:gray; margin-top:10px;">Близкие не добавлены</p>`;
+          html += `<p><em>Близкие не добавлены</em></p>`;
         }
         html += `</div>`;
-      }
+      });
       div.innerHTML = html;
-    } catch(e) { div.innerHTML = '<p>Ошибка: ' + e.message + '</p>'; }
+    } catch (err) {
+      div.innerHTML = '<p>Ошибка: ' + err.message + '</p>';
+      console.error(err);
+    }
   }
   load();
 </script>
