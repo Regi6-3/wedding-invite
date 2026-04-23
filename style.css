@@ -200,7 +200,7 @@ body {
   border: 1px solid #ddd;
 }
 
-/* ===== КНОПКИ АНКЕТЫ (как были раньше) ===== */
+/* ===== КНОПКИ АНКЕТЫ (аккуратные, без излишеств) ===== */
 .small-btn, .full-btn {
   background: #9B6B5C;
   color: white;
@@ -243,7 +243,7 @@ body {
   font-family: 'Playfair Display', serif;
 }
 
-/* ===== ПРОСТЫЕ И ЕДИНЫЕ СТИЛИ ДЛЯ ВСЕХ ПОЛЕЙ ФОРМЫ (как было раньше) ===== */
+/* ===== ЕДИНЫЙ, ПРОСТОЙ СТИЛЬ ДЛЯ ВСЕХ ПОЛЕЙ ===== */
 .form-group {
   margin-bottom: 20px;
   text-align: left;
@@ -255,19 +255,25 @@ body {
   font-size: 1rem;
   color: #2c3e2f;
 }
+/* Все поля (основные и в блоках близких) получают одинаковое оформление */
 .form-group select,
-.form-group input[type="text"] {
+.form-group input[type="text"],
+.companion-block select,
+.companion-block input[type="text"] {
   width: 100%;
-  padding: 10px;
-  border-radius: 12px;
+  padding: 8px 10px;
   border: 1px solid #ccc;
-  background: white;
+  border-radius: 6px;
+  background: #fff;
   font-size: 1rem;
-  font-family: 'Roboto', sans-serif;
-  transition: 0.2s;
+  font-family: inherit;
+  box-sizing: border-box;
 }
+/* Единый стиль при фокусе */
 .form-group select:focus,
-.form-group input[type="text"]:focus {
+.form-group input:focus,
+.companion-block select:focus,
+.companion-block input:focus {
   outline: none;
   border-color: #9B6B5C;
   box-shadow: 0 0 0 2px rgba(155,107,92,0.2);
