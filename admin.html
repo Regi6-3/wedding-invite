@@ -2,97 +2,67 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <title>Список гостей</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Админка свадьбы</title>
   <style>
-    body { font-family: Arial, sans-serif; background: #f0f0e0; margin: 0; padding: 20px; }
-    .guest { background: white; border-radius: 16px; padding: 16px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-    .name { font-size: 1.6rem; font-weight: bold; color: #6b4c3b; }
-    .status { display: inline-block; background: #6b4c3b; color: white; border-radius: 20px; padding: 4px 12px; font-size: 0.8rem; margin-left: 10px; }
-    .date { color: gray; font-size: 0.8rem; margin: 8px 0; }
-    table { width: 100%; border-collapse: collapse; margin: 12px 0; }
-    th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-    th { background: #e0e0d0; }
-    .companion { margin: 8px 0; padding: 6px; background: #f9f9f0; border-radius: 8px; }
-    .companion strong { color: #6b4c3b; }
+    body { font-family: system-ui; background: #f0f2f5; padding: 20px; }
+    .guest-card { background: white; border-radius: 20px; padding: 20px; margin-bottom: 24px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+    .guest-name { font-size: 1.5rem; font-weight: bold; color: #2c3e2f; }
+    .attending { display: inline-block; padding: 4px 12px; border-radius: 40px; font-size: 0.85rem; margin: 8px 0; }
+    .attending-yes { background: #e0f2e9; color: #1e6f3f; }
+    .attending-no { background: #ffe6e5; color: #b33; }
+    .guest-date { font-size: 0.8rem; color: #666; margin-bottom: 16px; }
+    h3 { font-size: 1.1rem; margin: 16px 0 8px; color: #4A5D3E; border-bottom: 1px solid #eee; }
+    table { width: 100%; border-collapse: collapse; background: #fefefe; }
+    th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid #e2e2e2; }
+    th { background: #f3f1ea; }
+    .companions-table { background: #faf8f3; margin-top: 8px; }
+    .empty { color: #999; font-style: italic; padding: 12px; background: #f9f9f9; border-radius: 12px; }
   </style>
 </head>
 <body>
-<h1>📋 Все ответы гостей</h1>
-<div id="root">Загрузка...</div>
-
+<h1>Все ответы гостей</h1>
+<div id="allGuests">Загрузка...</div>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 <script src="firebase-config.js"></script>
 <script>
-  async function loadAll() {
-    const container = document.getElementById('root');
+  function escapeHtml(str) { return str ? String(str).replace(/[&<>]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[m])) : ''; }
+  function formatDate(ts) { return ts?.toDate().toLocaleString() || '—'; }
+  async function loadAllGuests() {
+    const container = document.getElementById('allGuests');
     try {
       const snapshot = await db.collection("guests").orderBy("timestamp", "desc").get();
-      if (snapshot.empty) {
-        container.innerHTML = '<p>Нет ответов</p>';
-        return;
-      }
+      if (snapshot.empty) { container.innerHTML = '<div class="empty">Нет ответов</div>'; return; }
       let html = '';
       snapshot.forEach(doc => {
-        const data = doc.data();
-        const attending = data.attending ? '✅ Придёт' : '❌ Не придёт';
-        html += `<div class="guest">
-          <div class="name">${escapeHtml(data.name)} <span class="status">${attending}</span></div>
-          <div class="date">📅 ${formatDate(data.timestamp)}</div>
-          
+        const d = doc.data();
+        const attendingClass = d.attending ? 'attending-yes' : 'attending-no';
+        const attendingText = d.attending ? '✅ Придёт' : '❌ Не придёт';
+        html += `<div class="guest-card">
+          <div class="guest-name">${escapeHtml(d.name)}</div>
+          <div class="attending ${attendingClass}">${attendingText}</div>
+          <div class="guest-date">📅 ${formatDate(d.timestamp)}</div>
           <h3>Основной гость</h3>
-          <table>
-            <tr><th>Трансфер</th><th>Алкоголь</th><th>Остановка в Казани</th><th>Останется на след. день</th></tr>
-            <tr>
-              <td>${escapeHtml(data.transfer)}</td>
-              <td>${escapeHtml(data.alcohol)}</td>
-              <td>${escapeHtml(data.accommodation)}</td>
-              <td>${escapeHtml(data.nextDay)}</td>
-            </tr>
-          </table>`;
-
-        // Близкие (companions)
-        if (data.companions && Array.isArray(data.companions) && data.companions.length > 0) {
-          html += `<h3>👥 Близкие (${data.companions.length} чел.)</h3>`;
-          html += `<div style="margin-bottom: 10px;">`;
-          data.companions.forEach((c, idx) => {
-            html += `<div class="companion">
-              <strong>${escapeHtml(c.name)}</strong><br>
-              Трансфер: ${escapeHtml(c.transfer)}<br>
-              Алкоголь: ${escapeHtml(c.alcohol)}<br>
-              Остановка: ${escapeHtml(c.accommodation)}<br>
-              След. день: ${escapeHtml(c.nextDay)}<br>
-            </div>`;
+          <table><thead><tr><th>Трансфер</th><th>Алкоголь</th><th>Остановка</th><th>След. день</th></tr></thead><tbody>
+          <tr><td>${escapeHtml(d.transfer)}</td><td>${escapeHtml(d.alcohol)}</td><td>${escapeHtml(d.accommodation)}</td><td>${escapeHtml(d.nextDay)}</td></tr>
+          </tbody></table>`;
+        if (d.companions && d.companions.length) {
+          html += `<h3>Близкие (${d.companions.length})</h3>
+          <table class="companions-table"><thead><tr><th>Имя</th><th>Трансфер</th><th>Алкоголь</th><th>Остановка</th><th>След. день</th></tr></thead><tbody>`;
+          d.companions.forEach(c => {
+            html += `<tr><td>${escapeHtml(c.name)}</td><td>${escapeHtml(c.transfer)}</td><td>${escapeHtml(c.alcohol)}</td><td>${escapeHtml(c.accommodation)}</td><td>${escapeHtml(c.nextDay)}</td></tr>`;
           });
-          html += `</div>`;
+          html += `</tbody></table>`;
         } else {
-          html += `<p style="color: gray;">Близкие не добавлены</p>`;
+          html += `<div class="empty">Нет добавленных близких</div>`;
         }
         html += `</div>`;
       });
       container.innerHTML = html;
-    } catch (err) {
-      console.error(err);
-      container.innerHTML = '<p>Ошибка загрузки: ' + err.message + '</p>';
-    }
+    } catch(e) { container.innerHTML = `<div class="empty">Ошибка: ${e.message}</div>`; }
   }
-
-  function escapeHtml(str) {
-    if (!str) return '—';
-    return String(str).replace(/[&<>]/g, function(m) {
-      if (m === '&') return '&amp;';
-      if (m === '<') return '&lt;';
-      if (m === '>') return '&gt;';
-      return m;
-    });
-  }
-
-  function formatDate(ts) {
-    if (!ts || !ts.toDate) return '—';
-    return ts.toDate().toLocaleString('ru-RU');
-  }
-
-  loadAll();
+  loadAllGuests();
 </script>
 </body>
 </html>
