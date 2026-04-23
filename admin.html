@@ -6,140 +6,71 @@
   <style>
     body { font-family: system-ui; background: #f0f2f5; padding: 20px; }
     .guest-card { background: white; border-radius: 20px; padding: 20px; margin-bottom: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-    .guest-name { font-size: 1.5rem; font-weight: bold; color: #2c3e2f; }
-    .attending { display: inline-block; padding: 4px 12px; border-radius: 40px; font-size: 0.85rem; margin: 8px 0; }
-    .attending-yes { background: #e0f2e9; color: #1e6f3f; }
-    .attending-no { background: #ffe6e5; color: #b33; }
-    .guest-date { font-size: 0.8rem; color: #666; margin-bottom: 16px; }
-    h3 { font-size: 1.2rem; margin: 16px 0 8px; color: #4A5D3E; border-bottom: 1px solid #eee; }
-    table { width: 100%; border-collapse: collapse; background: white; border-radius: 12px; overflow: hidden; margin-bottom: 8px; }
-    th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid #e2e2e2; }
+    h2 { color: #2c3e2f; margin-bottom: 8px; }
+    table { width: 100%; border-collapse: collapse; margin: 15px 0; background: white; }
+    th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
     th { background: #f3f1ea; }
-    .companion-table { background: #faf8f3; }
+    .info { margin-bottom: 15px; }
   </style>
 </head>
 <body>
-<h1>📋 Все ответы гостей</h1>
-<div id="allGuests">⏳ Загрузка...</div>
+<h1>📋 Список гостей и их близких</h1>
+<div id="allGuests">Загрузка...</div>
 
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 <script src="firebase-config.js"></script>
 <script>
-  // Функция безопасного форматирования даты
-  function formatTimestamp(ts) {
-    if (!ts) return '—';
-    if (typeof ts.toDate === 'function') {
-      try {
-        return ts.toDate().toLocaleString();
-      } catch(e) {
-        return 'ошибка даты';
-      }
-    }
-    return String(ts);
-  }
-
-  function escapeHtml(str) {
-    if (str === undefined || str === null) return '';
-    return String(str).replace(/[&<>]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[m]));
-  }
-
   async function loadAllGuests() {
     const container = document.getElementById('allGuests');
-    container.innerHTML = '⏳ Загрузка данных...';
-    
     try {
-      console.log('=== ДИАГНОСТИКА ===');
-      console.log('Проверяем объект db:', typeof db, db ? 'есть' : 'нет');
-      
-      // Просто получим все документы без сортировки, чтобы исключить проблемы с orderBy
-      const snapshot = await db.collection("guests").get();
-      console.log('Количество документов в коллекции guests:', snapshot.size);
-      
+      const snapshot = await db.collection("guests").orderBy("timestamp", "desc").get();
       if (snapshot.empty) {
-        container.innerHTML = '<p>📭 Нет ответов (коллекция пуста)</p>';
+        container.innerHTML = '<p>Нет ответов</p>';
         return;
       }
-      
-      // Выведем ID всех документов
-      const allIds = snapshot.docs.map(doc => doc.id);
-      console.log('ID всех документов:', allIds);
-      
       let html = '';
-      let processedCount = 0;
-      let errorCount = 0;
-      
-      // Пройдёмся по каждому документу
       snapshot.forEach(doc => {
-        processedCount++;
-        console.log(`\n--- Обработка документа ${processedCount} (ID: ${doc.id}) ---`);
         const d = doc.data();
-        console.log('Данные документа:', d);
-        
-        try {
-          const attendingClass = d.attending ? 'attending-yes' : 'attending-no';
-          const attendingText = d.attending ? '✅ Придёт' : '❌ Не придёт';
-          
-          html += `<div class="guest-card">
-            <div class="guest-name">${escapeHtml(d.name)}</div>
-            <div class="attending ${attendingClass}">${attendingText}</div>
-            <div class="guest-date">📅 ${formatTimestamp(d.timestamp)}</div>
-            <h3>🎯 Основной гость</h3>
-            <table>
-              <thead><tr><th>Трансфер</th><th>Алкоголь</th><th>Остановка</th><th>След. день</th></tr></thead>
-              <tbody><tr>
-                <td>${escapeHtml(d.transfer || '—')}</td>
-                <td>${escapeHtml(d.alcohol || '—')}</td>
-                <td>${escapeHtml(d.accommodation || '—')}</td>
-                <td>${escapeHtml(d.nextDay || '—')}</td>
-              </tr></tbody>
-            </table>`;
-          
-          const companions = Array.isArray(d.companions) ? d.companions : [];
-          if (companions.length > 0) {
-            html += `<h3>👥 Близкие (${companions.length})</h3>
-            <table class="companion-table">
-              <thead><tr><th>Имя</th><th>Трансфер</th><th>Алкоголь</th><th>Остановка</th><th>След. день</th></tr></thead>
-              <tbody>`;
-            companions.forEach(comp => {
-              html += `<tr>
-                <td><strong>${escapeHtml(comp.name)}</strong></td>
-                <td>${escapeHtml(comp.transfer)}</td>
-                <td>${escapeHtml(comp.alcohol)}</td>
-                <td>${escapeHtml(comp.accommodation)}</td>
-                <td>${escapeHtml(comp.nextDay)}</td>
-              </tr>`;
-            });
-            html += `</tbody></table>`;
-          } else {
-            html += `<div style="margin-top:12px; padding:8px; background:#f9f2e4; border-radius:12px;">📝 Близкие не добавлены</div>`;
+        html += `<div class="guest-card">
+          <h2>${d.name || 'Без имени'}</h2>
+          <div class="info">✅ ${d.attending ? 'Придёт' : 'Не придёт'} | 📅 ${d.timestamp?.toDate().toLocaleString() || '—'}</div>
+          <div class="info"><strong>Основной гость:</strong> Трансфер: ${d.transfer || '—'}, Алкоголь: ${d.alcohol || '—'}, Остановка: ${d.accommodation || '—'}, След. день: ${d.nextDay || '—'}</div>`;
+
+        // Ищем массив с близкими (автоматически)
+        let companions = null;
+        for (let key in d) {
+          if (Array.isArray(d[key]) && d[key].length > 0 && d[key][0] && typeof d[key][0] === 'object') {
+            companions = d[key];
+            break;
           }
-          html += `</div>`;
-          console.log(`✅ Документ ${doc.id} успешно добавлен в HTML`);
-        } catch (err) {
-          errorCount++;
-          console.error(`❌ Ошибка при обработке документа ${doc.id}:`, err);
         }
+        if (companions && companions.length > 0) {
+          html += `<h3>👥 Близкие (${companions.length})</h3>
+          <table>
+            <thead><tr><th>Имя</th><th>Трансфер</th><th>Алкоголь</th><th>Остановка</th><th>След. день</th></tr></thead>
+            <tbody>`;
+          companions.forEach(c => {
+            html += `<tr>
+              <td><strong>${c.name || '—'}</strong></td>
+              <td>${c.transfer || '—'}</td>
+              <td>${c.alcohol || '—'}</td>
+              <td>${c.accommodation || '—'}</td>
+              <td>${c.nextDay || '—'}</td>
+            </tr>`;
+          });
+          html += `</tbody></table>`;
+        } else {
+          html += `<p><em>Близкие не добавлены</em></p>`;
+        }
+        html += `</div>`;
       });
-      
-      console.log(`\n=== ИТОГО: обработано ${processedCount}, ошибок ${errorCount}`);
-      
-      if (errorCount > 0) {
-        html += `<p style="color: #b33; margin-top: 20px;">⚠️ При загрузке ${errorCount} гостей(я) произошла ошибка. Смотрите консоль (F12).</p>`;
-      }
-      
-      if (processedCount === 0) {
-        container.innerHTML = '<p>❌ Не удалось обработать ни одного гостя</p>';
-      } else {
-        container.innerHTML = html;
-      }
-      
-    } catch(e) {
-      console.error('КРИТИЧЕСКАЯ ОШИБКА Firestore:', e);
-      container.innerHTML = `<p>❌ Ошибка подключения к Firestore: ${e.message}<br>Проверьте консоль и настройки Firebase.</p>`;
+      container.innerHTML = html;
+    } catch (err) {
+      container.innerHTML = `<p>Ошибка: ${err.message}</p>`;
+      console.error(err);
     }
   }
-  
   loadAllGuests();
 </script>
 </body>
