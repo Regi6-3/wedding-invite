@@ -2,76 +2,47 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <title>Админка - все гости и близкие</title>
+  <title>Отладка: структура companions</title>
   <style>
-    body { font-family: system-ui; background: #f0f2f5; padding: 20px; }
-    .guest-card { background: white; border-radius: 20px; padding: 20px; margin-bottom: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-    h2 { color: #2c3e2f; margin-bottom: 8px; }
-    table { width: 100%; border-collapse: collapse; margin: 15px 0; background: white; }
-    th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-    th { background: #f3f1ea; }
-    .info { margin-bottom: 15px; }
+    body { font-family: monospace; padding: 20px; }
+    pre { background: #f4f4f4; padding: 10px; overflow-x: auto; }
+    .guest { border-bottom: 1px solid #ccc; margin-bottom: 20px; }
   </style>
 </head>
 <body>
-<h1>📋 Список гостей и их близких</h1>
-<div id="allGuests">Загрузка...</div>
+<h1>Проверка структуры companions в Firebase</h1>
+<div id="debug"></div>
 
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 <script src="firebase-config.js"></script>
 <script>
-  async function loadAllGuests() {
-    const container = document.getElementById('allGuests');
+  async function debugCompanions() {
+    const container = document.getElementById('debug');
     try {
-      const snapshot = await db.collection("guests").orderBy("timestamp", "desc").get();
+      const snapshot = await db.collection("guests").get();
       if (snapshot.empty) {
-        container.innerHTML = '<p>Нет ответов</p>';
+        container.innerHTML = '<p>Нет документов</p>';
         return;
       }
       let html = '';
       snapshot.forEach(doc => {
         const d = doc.data();
-        html += `<div class="guest-card">
-          <h2>${d.name || 'Без имени'}</h2>
-          <div class="info">✅ ${d.attending ? 'Придёт' : 'Не придёт'} | 📅 ${d.timestamp?.toDate().toLocaleString() || '—'}</div>
-          <div class="info"><strong>Основной гость:</strong> Трансфер: ${d.transfer || '—'}, Алкоголь: ${d.alcohol || '—'}, Остановка: ${d.accommodation || '—'}, След. день: ${d.nextDay || '—'}</div>`;
-
-        // Ищем массив с близкими (автоматически)
-        let companions = null;
-        for (let key in d) {
-          if (Array.isArray(d[key]) && d[key].length > 0 && d[key][0] && typeof d[key][0] === 'object') {
-            companions = d[key];
-            break;
-          }
-        }
-        if (companions && companions.length > 0) {
-          html += `<h3>👥 Близкие (${companions.length})</h3>
-          <table>
-            <thead><tr><th>Имя</th><th>Трансфер</th><th>Алкоголь</th><th>Остановка</th><th>След. день</th></tr></thead>
-            <tbody>`;
-          companions.forEach(c => {
-            html += `<tr>
-              <td><strong>${c.name || '—'}</strong></td>
-              <td>${c.transfer || '—'}</td>
-              <td>${c.alcohol || '—'}</td>
-              <td>${c.accommodation || '—'}</td>
-              <td>${c.nextDay || '—'}</td>
-            </tr>`;
-          });
-          html += `</tbody></table>`;
-        } else {
-          html += `<p><em>Близкие не добавлены</em></p>`;
-        }
-        html += `</div>`;
+        html += `<div class="guest">
+          <h2>Гость: ${d.name}</h2>
+          <p>attending: ${d.attending}</p>
+          <p>Поле companions:</p>
+          <pre>${JSON.stringify(d.companions, null, 2)}</pre>
+          <p>Тип companions: ${Array.isArray(d.companions) ? 'массив' : typeof d.companions}</p>
+          ${Array.isArray(d.companions) && d.companions.length ? `<p>Первый элемент: ${JSON.stringify(d.companions[0])}</p>` : ''}
+        </div>`;
       });
       container.innerHTML = html;
-    } catch (err) {
-      container.innerHTML = `<p>Ошибка: ${err.message}</p>`;
-      console.error(err);
+    } catch(e) {
+      container.innerHTML = '<p>Ошибка: ' + e.message + '</p>';
     }
   }
-  loadAllGuests();
+  debugCompanions();
 </script>
 </body>
 </html>
