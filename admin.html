@@ -1,72 +1,35 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html>
 <head>
   <meta charset="UTF-8">
-  <title>Админка - гости и близкие (подколлекции)</title>
-  <style>
-    body { font-family: system-ui; background: #f0f2f5; padding: 20px; }
-    .guest-card { background: white; border-radius: 20px; padding: 20px; margin-bottom: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-    h2 { color: #2c3e2f; margin-bottom: 8px; }
-    table { width: 100%; border-collapse: collapse; margin: 15px 0; background: white; }
-    th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-    th { background: #f3f1ea; }
-    .info { margin-bottom: 15px; }
-  </style>
+  <title>Админка с близкими</title>
+  <style>td,th{border:1px solid #ccc;padding:8px;} table{border-collapse:collapse;}</style>
 </head>
 <body>
-<h1>📋 Все гости и их близкие (подколлекции)</h1>
-<div id="allGuests">Загрузка...</div>
-
+<h1>Гости и их близкие</h1>
+<div id="content"></div>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 <script src="firebase-config.js"></script>
 <script>
-  async function loadAllGuests() {
-    const container = document.getElementById('allGuests');
-    try {
-      const guestsSnapshot = await db.collection("guests").orderBy("timestamp", "desc").get();
-      if (guestsSnapshot.empty) {
-        container.innerHTML = '<p>Нет ответов</p>';
-        return;
+  db.collection("guests").get().then(snap => {
+    let html = '';
+    snap.forEach(doc => {
+      let d = doc.data();
+      html += `<h3>${d.name}</h3><p>Придёт: ${d.attending ? 'Да' : 'Нет'}</p>`;
+      if (d.companions && d.companions.length) {
+        html += `<table><tr><th>Имя</th><th>Трансфер</th><th>Алкоголь</th><th>Остановка</th><th>След. день</th></tr>`;
+        d.companions.forEach(c => {
+          html += `<tr><td>${c.name}</td><td>${c.transfer}</td><td>${c.alcohol}</td><td>${c.accommodation}</td><td>${c.nextDay}</td></tr>`;
+        });
+        html += `</table>`;
+      } else {
+        html += `<p>Нет близких</p>`;
       }
-      let html = '';
-      for (const guestDoc of guestsSnapshot.docs) {
-        const g = guestDoc.data();
-        html += `<div class="guest-card">
-          <h2>${g.name || 'Без имени'}</h2>
-          <div class="info">✅ ${g.attending ? 'Придёт' : 'Не придёт'} | 📅 ${g.timestamp?.toDate().toLocaleString() || '—'}</div>
-          <div class="info"><strong>Основной гость:</strong> Трансфер: ${g.transfer || '—'}, Алкоголь: ${g.alcohol || '—'}, Остановка: ${g.accommodation || '—'}, След. день: ${g.nextDay || '—'}</div>`;
-
-        // Загружаем подколлекцию companions
-        const companionsSnap = await guestDoc.ref.collection("companions").orderBy("timestamp").get();
-        if (!companionsSnap.empty) {
-          html += `<h3>👥 Близкие (${companionsSnap.size})</h3>
-          <table>
-            <thead><tr><th>Имя</th><th>Трансфер</th><th>Алкоголь</th><th>Остановка</th><th>След. день</th></tr></thead>
-            <tbody>`;
-          companionsSnap.forEach(comp => {
-            const c = comp.data();
-            html += `<tr>
-              <td><strong>${c.name || '—'}</strong></td>
-              <td>${c.transfer || '—'}</td>
-              <td>${c.alcohol || '—'}</td>
-              <td>${c.accommodation || '—'}</td>
-              <td>${c.nextDay || '—'}</td>
-            </tr>`;
-          });
-          html += `</tbody></table>`;
-        } else {
-          html += `<p><em>Близкие не добавлены</em></p>`;
-        }
-        html += `</div>`;
-      }
-      container.innerHTML = html;
-    } catch (err) {
-      container.innerHTML = `<p>Ошибка: ${err.message}</p>`;
-      console.error(err);
-    }
-  }
-  loadAllGuests();
+      html += `<hr>`;
+    });
+    document.getElementById('content').innerHTML = html;
+  });
 </script>
 </body>
 </html>
