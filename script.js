@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', function() {
   function updateCountdown() {
     const now = new Date().getTime();
     const distance = weddingDate - now;
-    const totalDays = Math.floor(distance / (1000 * 60 * 60 * 24));
+    const totalDays = Math.floor(distance / (1000*60*60*24));
     const weeks = Math.floor(totalDays / 7);
     const days = totalDays % 7;
     const hours = Math.floor((distance % (86400000)) / 3600000);
@@ -17,6 +17,7 @@ document.addEventListener('DOMContentLoaded', function() {
   }
   setInterval(updateCountdown, 1000); updateCountdown();
 
+  // Карта
   function initMap() {
     if (typeof ymaps === 'undefined') return;
     ymaps.ready(() => {
@@ -24,9 +25,9 @@ document.addEventListener('DOMContentLoaded', function() {
       myMap.geoObjects.add(new ymaps.Placemark([55.865728, 49.108624], { balloonContent: "Банкетный зал 'Чайковский', ул. Деметьева, 51, Казань" }));
     });
   }
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initMap);
-  else initMap();
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initMap); else initMap();
 
+  // Предварительная регистрация
   let currentGuestId = null;
   const preForm = document.getElementById('preRsvpForm');
   const preMsg = document.getElementById('preMsg');
@@ -48,7 +49,7 @@ document.addEventListener('DOMContentLoaded', function() {
       try {
         const docRef = await db.collection("guests").add(data);
         currentGuestId = docRef.id;
-        preMsg.innerText = 'Спасибо, ' + guestName + '! Ответ сохранён.';
+        preMsg.innerText = 'Спасибо, ' + guestName + '! Ваш ответ сохранён.';
         preMsg.style.color = 'green';
         if (attendingBool) questionnaireBlock.style.display = 'block';
         else questionnaireBlock.style.display = 'none';
@@ -61,29 +62,34 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 
+  // Динамическое добавление близких
   const companionsContainer = document.getElementById('companionsContainer');
   let companionCounter = 0;
   function createCompanionBlock(index) {
     const div = document.createElement('div');
     div.className = 'companion-block';
     div.innerHTML = `
-      <h4>Близкий человек ${index+1}</h4>
+      <h4 style="margin-top:15px;">Близкий человек ${index+1}</h4>
       <div class="form-group"><label>Имя</label><input type="text" name="cname_${index}" placeholder="Имя гостя" required></div>
       <div class="form-group"><label>Трансфер</label><select name="ctransfer_${index}"><option value="Нет">Нет</option><option value="Да">Да</option></select></div>
       <div class="form-group"><label>Алкоголь</label><select name="calcohol_${index}"><option value="Вино">Вино</option><option value="Шампанское">Шампанское</option><option value="Водка">Водка</option><option value="Не буду пить алкоголь">Не буду пить алкоголь</option></select></div>
       <div class="form-group"><label>Остановка в Казани</label><select name="caccom_${index}"><option value="Да">Да</option><option value="Нет">Нет</option></select></div>
       <div class="form-group"><label>Останется на след. день?</label><select name="cnext_${index}"><option value="Да">Да</option><option value="Нет">Нет</option></select></div>
-      <button type="button" class="remove-companion">Удалить</button>
+      <button type="button" class="remove-companion" style="background:#ddd; border:none; padding:5px 12px; border-radius:20px; margin-bottom:10px;">Удалить</button>
+      <hr style="margin:15px 0;">
     `;
     div.querySelector('.remove-companion').addEventListener('click', () => div.remove());
     return div;
   }
   document.body.addEventListener('click', (e) => {
     if (e.target && e.target.id === 'addCompanionBtn') {
-      companionsContainer.appendChild(createCompanionBlock(companionCounter++));
+      if (companionsContainer) {
+        companionsContainer.appendChild(createCompanionBlock(companionCounter++));
+      }
     }
   });
 
+  // Отправка анкеты (сохраняет всех близких с именами)
   const fullForm = document.getElementById('fullQuestionnaire');
   const qMsg = document.getElementById('questionnaireMsg');
   if (fullForm) {
@@ -103,10 +109,10 @@ document.addEventListener('DOMContentLoaded', function() {
       };
       const companions = [];
       document.querySelectorAll('.companion-block').forEach(block => {
-        const name = block.querySelector('input[type="text"]')?.value.trim();
-        if (name) {
+        const nameInput = block.querySelector('input[type="text"]');
+        if (nameInput && nameInput.value.trim()) {
           companions.push({
-            name: name,
+            name: nameInput.value.trim(),
             transfer: block.querySelector('select[name^="ctransfer"]')?.value || 'Нет',
             alcohol: block.querySelector('select[name^="calcohol"]')?.value || 'Не буду пить алкоголь',
             accommodation: block.querySelector('select[name^="caccom"]')?.value || 'Нет',
@@ -114,8 +120,7 @@ document.addEventListener('DOMContentLoaded', function() {
           });
         }
       });
-      if (companions.length) formData.companions = companions;
-
+      if (companions.length > 0) formData.companions = companions;
       try {
         await db.collection("guests").doc(currentGuestId).update(formData);
         qMsg.innerText = 'Анкета отправлена! Спасибо.';
@@ -132,12 +137,13 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 
+  // Календарь
   document.getElementById('addToCalendarBtn')?.addEventListener('click', () => {
-    const start = new Date(2026, 7, 28, 18, 0, 0);
-    const end = new Date(2026, 7, 28, 23, 0, 0);
-    const fmt = (d) => d.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+    const start = new Date(2026,7,28,18,0,0);
+    const end = new Date(2026,7,28,23,0,0);
+    const fmt = d => d.toISOString().replace(/[-:]/g,'').split('.')[0]+'Z';
     const ics = `BEGIN:VCALENDAR\nVERSION:2.0\nBEGIN:VEVENT\nUID:${Date.now()}@wedding\nDTSTAMP:${fmt(new Date())}\nDTSTART:${fmt(start)}\nDTEND:${fmt(end)}\nSUMMARY:Свадьба Алексея и Регины\nDESCRIPTION:Гостевой дом "Чайковский", ул. Деметьева 51, Казань\nLOCATION:ул. Деметьева 51, Казань\nEND:VEVENT\nEND:VCALENDAR`;
-    const blob = new Blob([ics], { type: 'text/calendar' });
+    const blob = new Blob([ics], {type:'text/calendar'});
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
     link.download = 'wedding.ics';
@@ -145,27 +151,29 @@ document.addEventListener('DOMContentLoaded', function() {
     URL.revokeObjectURL(link.href);
   });
 
+  // Музыка
   const audio = document.getElementById('weddingAudio');
   const musicBtn = document.getElementById('playMusicBtn');
   if (audio && musicBtn) {
     let playing = false;
     musicBtn.onclick = () => {
       if (playing) { audio.pause(); musicBtn.innerHTML = '<i class="fas fa-music"></i> Включить музыку'; }
-      else { audio.play().catch(e => alert('Ошибка: ' + e)); musicBtn.innerHTML = '<i class="fas fa-stop"></i> Выключить музыку'; }
+      else { audio.play().catch(e=>alert('Ошибка: '+e)); musicBtn.innerHTML = '<i class="fas fa-stop"></i> Выключить музыку'; }
       playing = !playing;
     };
   }
 
+  // Конфетти
   function fireConfetti() {
-    const colors = ['#FFD700', '#FF69B4', '#FFFFFF', '#9B6B5C', '#C5E0B4'];
-    for (let i = 0; i < 120; i++) {
-      const confetto = document.createElement('div');
-      confetto.style.cssText = `position:fixed; width:${Math.random()*8+4}px; height:${Math.random()*8+4}px; background:${colors[Math.floor(Math.random()*colors.length)]}; border-radius:${Math.random()>0.5?'50%':'0'}; left:${Math.random()*window.innerWidth}px; top:-20px; z-index:9999; pointer-events:none; opacity:${Math.random()*0.8+0.3}; animation:fall ${Math.random()*2+2}s linear forwards;`;
-      document.body.appendChild(confetto);
-      setTimeout(() => confetto.remove(), 3000);
+    const colors = ['#FFD700','#FF69B4','#FFFFFF','#9B6B5C','#C5E0B4'];
+    for(let i=0; i<120; i++) {
+      const c = document.createElement('div');
+      c.style.cssText = `position:fixed; width:${Math.random()*8+4}px; height:${Math.random()*8+4}px; background:${colors[Math.floor(Math.random()*colors.length)]}; border-radius:${Math.random()>0.5?'50%':'0'}; left:${Math.random()*window.innerWidth}px; top:-20px; z-index:9999; pointer-events:none; opacity:${Math.random()*0.8+0.3}; animation:fall ${Math.random()*2+2}s linear forwards;`;
+      document.body.appendChild(c);
+      setTimeout(()=>c.remove(),3000);
     }
   }
-  if (!document.querySelector('#confetti-style')) {
+  if(!document.querySelector('#confetti-style')) {
     const style = document.createElement('style');
     style.id = 'confetti-style';
     style.textContent = '@keyframes fall { 0% { transform: translateY(0) rotate(0deg); opacity: 1; } 100% { transform: translateY(100vh) rotate(360deg); opacity: 0; } }';
