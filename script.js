@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', function() {
-  // ========== ТАЙМЕР ==========
+  // Таймер
   const weddingDate = new Date("August 28, 2026 18:00:00").getTime();
   function updateCountdown() {
     const now = new Date().getTime();
@@ -16,10 +16,9 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById("minutes").innerText = minutes < 10 ? "0"+minutes : minutes;
     document.getElementById("seconds").innerText = seconds < 10 ? "0"+seconds : seconds;
   }
-  setInterval(updateCountdown, 1000);
-  updateCountdown();
+  setInterval(updateCountdown, 1000); updateCountdown();
 
-  // ========== КАРТА ==========
+  // Карта
   function initMap() {
     if (typeof ymaps === 'undefined') return;
     ymaps.ready(() => {
@@ -27,10 +26,9 @@ document.addEventListener('DOMContentLoaded', function() {
       myMap.geoObjects.add(new ymaps.Placemark([55.865728, 49.108624], { balloonContent: "Банкетный зал 'Чайковский', ул. Деметьева, 51, Казань" }));
     });
   }
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initMap);
-  else initMap();
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initMap); else initMap();
 
-  // ========== ПРЕДВАРИТЕЛЬНЫЙ ОТВЕТ ==========
+  // Предварительный ответ
   let currentGuestId = null;
   const preForm = document.getElementById('preRsvpForm');
   const preMsg = document.getElementById('preMsg');
@@ -65,23 +63,23 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 
-  // ========== ДОБАВЛЕНИЕ БЛИЗКИХ ==========
+  // Добавление близких
   const companionsContainer = document.getElementById('companionsContainer');
   let companionCounter = 0;
   function createCompanionBlock(index) {
     const div = document.createElement('div');
     div.className = 'companion-block';
-    div.style.border = '1px solid #ddd';
+    div.style.border = '1px solid #ccc';
     div.style.padding = '10px';
     div.style.margin = '10px 0';
     div.innerHTML = `
       <h4>Близкий человек ${index+1}</h4>
-      <div class="form-group"><label>Имя</label><input type="text" name="cname_${index}" placeholder="Имя гостя" required></div>
-      <div class="form-group"><label>Трансфер</label><select name="ctransfer_${index}"><option value="Нет">Нет</option><option value="Да">Да</option></select></div>
-      <div class="form-group"><label>Алкоголь</label><select name="calcohol_${index}"><option value="Вино">Вино</option><option value="Шампанское">Шампанское</option><option value="Водка">Водка</option><option value="Не буду пить алкоголь">Не буду пить алкоголь</option></select></div>
-      <div class="form-group"><label>Остановка в Казани</label><select name="caccom_${index}"><option value="Да">Да</option><option value="Нет">Нет</option></select></div>
-      <div class="form-group"><label>Останется на след. день?</label><select name="cnext_${index}"><option value="Да">Да</option><option value="Нет">Нет</option></select></div>
-      <button type="button" class="remove-companion" style="background:#ddd; border:none; padding:5px 12px; border-radius:20px;">Удалить</button>
+      <div><label>Имя</label><br><input type="text" name="cname_${index}" placeholder="Имя" required></div>
+      <div><label>Трансфер</label><br><select name="ctransfer_${index}"><option value="Нет">Нет</option><option value="Да">Да</option></select></div>
+      <div><label>Алкоголь</label><br><select name="calcohol_${index}"><option value="Вино">Вино</option><option value="Шампанское">Шампанское</option><option value="Водка">Водка</option><option value="Не буду пить алкоголь">Не буду пить алкоголь</option></select></div>
+      <div><label>Остановка в Казани</label><br><select name="caccom_${index}"><option value="Да">Да</option><option value="Нет">Нет</option></select></div>
+      <div><label>Останется на след. день?</label><br><select name="cnext_${index}"><option value="Да">Да</option><option value="Нет">Нет</option></select></div>
+      <button type="button" class="remove-companion" style="margin-top:8px;">Удалить</button>
     `;
     div.querySelector('.remove-companion').addEventListener('click', () => div.remove());
     return div;
@@ -94,7 +92,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   });
 
-  // ========== ОТПРАВКА АНКЕТЫ ==========
+  // Отправка анкеты (создаём подколлекцию companions)
   const fullForm = document.getElementById('fullQuestionnaire');
   const qMsg = document.getElementById('questionnaireMsg');
   if (fullForm) {
@@ -105,32 +103,32 @@ document.addEventListener('DOMContentLoaded', function() {
         qMsg.style.color = 'red';
         return;
       }
-      const formData = {
+      // Основные данные
+      const mainData = {
         transfer: fullForm.transfer.value,
         alcohol: fullForm.alcohol.value,
         accommodation: fullForm.accommodation.value,
         nextDay: fullForm.nextDay.value,
         questionnaireTimestamp: firebase.firestore.FieldValue.serverTimestamp()
       };
-      const companions = [];
-      document.querySelectorAll('.companion-block').forEach(block => {
-        const nameInput = block.querySelector('input[type="text"]');
-        if (nameInput && nameInput.value.trim()) {
-          companions.push({
-            name: nameInput.value.trim(),
-            transfer: block.querySelector('select[name^="ctransfer"]')?.value || 'Нет',
-            alcohol: block.querySelector('select[name^="calcohol"]')?.value || 'Не буду пить алкоголь',
-            accommodation: block.querySelector('select[name^="caccom"]')?.value || 'Нет',
-            nextDay: block.querySelector('select[name^="cnext"]')?.value || 'Нет'
-          });
-        }
-      });
-      if (companions.length > 0) {
-        formData.companions = companions;
-        console.log('Сохраняем companions:', companions); // для отладки
-      }
       try {
-        await db.collection("guests").doc(currentGuestId).update(formData);
+        await db.collection("guests").doc(currentGuestId).update(mainData);
+        // Сохраняем каждого близкого в подколлекцию
+        const blocks = document.querySelectorAll('.companion-block');
+        for (let block of blocks) {
+          const nameInput = block.querySelector('input[type="text"]');
+          if (nameInput && nameInput.value.trim()) {
+            const compData = {
+              name: nameInput.value.trim(),
+              transfer: block.querySelector('select[name^="ctransfer"]')?.value || 'Нет',
+              alcohol: block.querySelector('select[name^="calcohol"]')?.value || 'Не буду пить алкоголь',
+              accommodation: block.querySelector('select[name^="caccom"]')?.value || 'Нет',
+              nextDay: block.querySelector('select[name^="cnext"]')?.value || 'Нет',
+              timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            };
+            await db.collection("guests").doc(currentGuestId).collection("companions").add(compData);
+          }
+        }
         qMsg.innerText = 'Анкета отправлена! Спасибо.';
         qMsg.style.color = 'green';
         fullForm.reset();
@@ -145,7 +143,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 
-  // ========== КАЛЕНДАРЬ, МУЗЫКА, КОНФЕТТИ ==========
+  // Календарь
   document.getElementById('addToCalendarBtn')?.addEventListener('click', () => {
     const start = new Date(2026,7,28,18,0,0);
     const end = new Date(2026,7,28,23,0,0);
@@ -159,6 +157,7 @@ document.addEventListener('DOMContentLoaded', function() {
     URL.revokeObjectURL(link.href);
   });
 
+  // Музыка
   const audio = document.getElementById('weddingAudio');
   const musicBtn = document.getElementById('playMusicBtn');
   if (audio && musicBtn) {
@@ -170,6 +169,7 @@ document.addEventListener('DOMContentLoaded', function() {
     };
   }
 
+  // Конфетти
   function fireConfetti() {
     const colors = ['#FFD700','#FF69B4','#FFFFFF','#9B6B5C','#C5E0B4'];
     for(let i=0; i<120; i++) {
