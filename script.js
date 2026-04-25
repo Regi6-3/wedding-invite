@@ -75,10 +75,11 @@ document.addEventListener('DOMContentLoaded', function() {
     div.innerHTML = `
       <h4>Анкета ${index}</h4>
       <div class="form-group"><label>Имя</label><input type="text" name="cname_${index}" placeholder="Имя гостя" required></div>
-      <div class="form-group"><label>Трансфер</label><select name="ctransfer_${index}"><option value="Нет">Нет</option><option value="Да">Да</option></select></div>
+      <div class="form-group"><label>Потребуется ли вам трансфер?</label><select name="ctransfer_${index}"><option value="Нет">Нет</option><option value="Да">Да</option></select></div>
       <div class="form-group"><label>Какой алкоголь вы предпочитаете?</label><select name="calcohol_${index}"><option value="Вино">Вино</option><option value="Шампанское">Шампанское</option><option value="Водка">Водка</option><option value="Не буду пить алкоголь">Не буду пить алкоголь</option></select></div>
       <div class="form-group"><label>Присоединитесь ли вы к нам праздновать торжество на следующий день?</label><select name="cnextDay_${index}"><option value="Да">Да</option><option value="Нет">Нет</option></select></div>
       <div class="form-group"><label>Останетесь вы на ночь после торжества?</label><select name="covernight_${index}"><option value="Да">Да</option><option value="Нет">Нет</option></select></div>
+      <div class="form-group"><label>Есть ли у вас диетические предпочтения?</label><select name="cdiet_${index}"><option value="Ем всё">Ем всё</option><option value="Не ем мясо">Не ем мясо</option><option value="Не ем рыбу">Не ем рыбу</option><option value="Не ем курицу">Не ем курицу</option></select></div>
       <button type="button" class="remove-companion"><i class="fas fa-trash-alt"></i> Удалить анкету</button>
     `;
     div.querySelector('.remove-companion').addEventListener('click', () => div.remove());
@@ -109,8 +110,9 @@ document.addEventListener('DOMContentLoaded', function() {
       const formData = {
         transfer: fullForm.transfer.value,
         alcohol: fullForm.alcohol.value,
-        nextDay: fullForm.nextDay.value,      // следующий день
-        overnight: fullForm.overnight.value,  // ночёвка
+        nextDay: fullForm.nextDay.value,
+        overnight: fullForm.overnight.value,
+        diet: fullForm.diet.value,
         questionnaireTimestamp: firebase.firestore.FieldValue.serverTimestamp()
       };
       try {
@@ -126,6 +128,7 @@ document.addEventListener('DOMContentLoaded', function() {
               alcohol: block.querySelector('select[name^="calcohol"]')?.value || 'Не буду пить алкоголь',
               nextDay: block.querySelector('select[name^="cnextDay"]')?.value || 'Нет',
               overnight: block.querySelector('select[name^="covernight"]')?.value || 'Нет',
+              diet: block.querySelector('select[name^="cdiet"]')?.value || 'Ем всё',
               timestamp: firebase.firestore.FieldValue.serverTimestamp()
             });
           }
