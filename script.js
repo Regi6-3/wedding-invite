@@ -65,9 +65,9 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 
-  // ========== ДОБАВЛЕНИЕ АНКЕТ (начиная с Анкеты 2) ==========
+  // ========== ДОБАВЛЕНИЕ АНКЕТ (нумерация с 2) ==========
   const companionsContainer = document.getElementById('companionsContainer');
-  let companionCounter = 2; // нумерация начинается с 2, т.к. основная анкета - это Анкета 1
+  let companionCounter = 2;
 
   function createCompanionBlock(index) {
     const div = document.createElement('div');
@@ -76,9 +76,9 @@ document.addEventListener('DOMContentLoaded', function() {
       <h4>Анкета ${index}</h4>
       <div class="form-group"><label>Имя</label><input type="text" name="cname_${index}" placeholder="Имя гостя" required></div>
       <div class="form-group"><label>Трансфер</label><select name="ctransfer_${index}"><option value="Нет">Нет</option><option value="Да">Да</option></select></div>
-      <div class="form-group"><label>Алкоголь</label><select name="calcohol_${index}"><option value="Вино">Вино</option><option value="Шампанское">Шампанское</option><option value="Водка">Водка</option><option value="Не буду пить алкоголь">Не буду пить алкоголь</option></select></div>
-      <div class="form-group"><label>Остановка в Казани</label><select name="caccom_${index}"><option value="Да">Да</option><option value="Нет">Нет</option></select></div>
-      <div class="form-group"><label>Останется на след. день?</label><select name="cnext_${index}"><option value="Да">Да</option><option value="Нет">Нет</option></select></div>
+      <div class="form-group"><label>Какой алкоголь вы предпочитаете?</label><select name="calcohol_${index}"><option value="Вино">Вино</option><option value="Шампанское">Шампанское</option><option value="Водка">Водка</option><option value="Не буду пить алкоголь">Не буду пить алкоголь</option></select></div>
+      <div class="form-group"><label>Присоединитесь ли вы к нам праздновать торжество на следующий день?</label><select name="cnextDay_${index}"><option value="Да">Да</option><option value="Нет">Нет</option></select></div>
+      <div class="form-group"><label>Останетесь вы на ночь после торжества?</label><select name="covernight_${index}"><option value="Да">Да</option><option value="Нет">Нет</option></select></div>
       <button type="button" class="remove-companion"><i class="fas fa-trash-alt"></i> Удалить анкету</button>
     `;
     div.querySelector('.remove-companion').addEventListener('click', () => div.remove());
@@ -95,7 +95,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   });
 
-  // ========== ОТПРАВКА АНКЕТЫ (сохраняем в подколлекцию companions) ==========
+  // ========== ОТПРАВКА АНКЕТЫ ==========
   const fullForm = document.getElementById('fullQuestionnaire');
   const qMsg = document.getElementById('questionnaireMsg');
   if (fullForm) {
@@ -109,8 +109,8 @@ document.addEventListener('DOMContentLoaded', function() {
       const formData = {
         transfer: fullForm.transfer.value,
         alcohol: fullForm.alcohol.value,
-        accommodation: fullForm.accommodation.value,
-        nextDay: fullForm.nextDay.value,
+        nextDay: fullForm.nextDay.value,      // следующий день
+        overnight: fullForm.overnight.value,  // ночёвка
         questionnaireTimestamp: firebase.firestore.FieldValue.serverTimestamp()
       };
       try {
@@ -124,8 +124,8 @@ document.addEventListener('DOMContentLoaded', function() {
               name: nameInput.value.trim(),
               transfer: block.querySelector('select[name^="ctransfer"]')?.value || 'Нет',
               alcohol: block.querySelector('select[name^="calcohol"]')?.value || 'Не буду пить алкоголь',
-              accommodation: block.querySelector('select[name^="caccom"]')?.value || 'Нет',
-              nextDay: block.querySelector('select[name^="cnext"]')?.value || 'Нет',
+              nextDay: block.querySelector('select[name^="cnextDay"]')?.value || 'Нет',
+              overnight: block.querySelector('select[name^="covernight"]')?.value || 'Нет',
               timestamp: firebase.firestore.FieldValue.serverTimestamp()
             });
           }
@@ -137,7 +137,7 @@ document.addEventListener('DOMContentLoaded', function() {
         qMsg.style.color = 'green';
         fullForm.reset();
         companionsContainer.innerHTML = '';
-        companionCounter = 2; // сброс счётчика
+        companionCounter = 2;
         questionnaireBlock.style.display = 'none';
         fireConfetti();
       } catch(err) {
