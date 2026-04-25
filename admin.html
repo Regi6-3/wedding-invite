@@ -31,11 +31,11 @@
         html += `<div class="guest-card">
           <h2>${g.name || 'Без имени'}</h2>
           <div class="info">✅ ${g.attending ? 'Придёт' : 'Не придёт'} | 📅 ${g.timestamp?.toDate().toLocaleString() || '—'}</div>
-          <div class="info"><strong>Основная анкета:</strong> Трансфер: ${g.transfer || '—'}, Алкоголь: ${g.alcohol || '—'}, След. день: ${g.nextDay || '—'}, Ночёвка: ${g.overnight || '—'}</div>`;
+          <div class="info"><strong>Основная анкета:</strong> Трансфер: ${g.transfer || '—'}, Алкоголь: ${g.alcohol || '—'}, След. день: ${g.nextDay || '—'}, Ночёвка: ${g.overnight || '—'}, Диета: ${g.diet || '—'}</div>`;
         const compSnap = await guestDoc.ref.collection("companions").orderBy("timestamp").get();
         if (!compSnap.empty) {
           html += `<h3>📄 Дополнительные анкеты (${compSnap.size})</h3>
-          <table><thead><tr><th>Имя</th><th>Трансфер</th><th>Алкоголь</th><th>След. день</th><th>Ночёвка</th></tr></thead><tbody>`;
+          <table><thead><tr><th>Имя</th><th>Трансфер</th><th>Алкоголь</th><th>След. день</th><th>Ночёвка</th><th>Диета</th></tr></thead><tbody>`;
           compSnap.forEach(c => {
             const comp = c.data();
             html += `<tr>
@@ -44,6 +44,7 @@
               <td>${comp.alcohol || '—'}</td>
               <td>${comp.nextDay || '—'}</td>
               <td>${comp.overnight || '—'}</td>
+              <td>${comp.diet || '—'}</td>
             </tr>`;
           });
           html += `</tbody></table>`;
