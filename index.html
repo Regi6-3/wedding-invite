@@ -7,7 +7,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Roboto:wght@300;400;500&family=Cormorant+Infant:wght@300;400;600;700&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css?v=3">
 </head>
 <body>
 
@@ -61,10 +61,13 @@
 
       <div class="love-quote-under-photo">Там, где посеяна любовь, растёт радость.</div>
 
+      <!-- НОВЫЙ ПУНКТ МЕНЮ -->
+      <p class="main-text"><strong class="cormorant-header">Меню</strong><br>
+      Меню разнообразно, поэтому сообщите нам заранее, если у вас есть какие-либо предпочтения или диетические ограничения. После подтверждения вы сможете пройти опрос о своих вкусовых предпочтениях и напитках.</p>
+
+      <!-- ИЗМЕНЁННЫЙ ТЕКСТ ПОЖЕЛАНИЙ -->
       <p class="main-text"><strong class="cormorant-header">Пожелания</strong><br>
-      Ваше присутствие в день нашей свадьбы - самый значимый подарок для нас!<br>
-      Мы понимаем, что дарить цветы на свадьбу - это традиция, но мы не сможем насладиться их красотой в полной мере...<br>
-      Будем рады любой другой альтернативе (желательно в денежном эквиваленте).</p>
+      Нам бы хотелось, чтобы в этот день сердца были лёгкими, души - открытыми, настроение - праздничным, а подарки - упакованными в конверты.</p>
 
       <p class="main-text"><strong class="cormorant-header">Примечание</strong><br>
       Будем благодарны, если вы воздержитесь от криков "Горько" на празднике, ведь поцелуй — это знак выражения чувств, он не может быть по заказу.</p>
@@ -72,19 +75,15 @@
       <p class="main-text"><strong class="cormorant-header">Подтверждение</strong><br>
       Пожалуйста, подтвердите свое присутствие до <u>01.08.2026</u>.</p>
 
-      <p class="main-text"><strong class="cormorant-header">Палитра для гостей</strong><br>
-      Будем благодарны, если при выборе нарядов на наше торжество вы придержитесь следующей палитры:</p>
-      <div class="palette">
-        <span style="background: #1B3B1B;"></span><span style="background: #2E5A2E;"></span><span style="background: #4A784A;"></span>
-        <span style="background: #6B9E6B;"></span><span style="background: #8FB88F;"></span><span style="background: #C5E0B4;"></span>
-        <span style="background: #D3D3D3;"></span><span style="background: #F5DEB3;"></span><span style="background: #D2B48C;"></span>
-        <span style="background: #A0522D;"></span><span style="background: #C3A343;"></span><span style="background: #B4D4E8;"></span>
+      <!-- ВМЕСТО ПАЛИТРЫ ЦВЕТОВ – КАРТИНКА 1.png -->
+      <div class="palette-image">
+        <img src="images/1.png" alt="Палитра цветов" style="max-width:100%; border-radius: 24px; margin: 15px 0;">
       </div>
-      <p class="small-note">Оставьте молочный и белый для невесты</p>
+      <p class="small-note">Ознакомьтесь с палитрой для гостей</p>
 
       <p class="closing">Ждём Вас на нашей свадьбе!</p>
 
-      <!-- Предварительная форма с закруглениями -->
+      <!-- Предварительная форма -->
       <form id="preRsvpForm">
         <input type="text" id="guestName" placeholder="Ваше имя" required>
         <select id="preAttending" required>
@@ -96,7 +95,7 @@
       </form>
       <div id="preMsg"></div>
 
-      <!-- АНКЕТА (изначально скрыта) -->
+      <!-- ОСНОВНАЯ АНКЕТА (изначально скрыта) -->
       <div id="questionnaireBlock" style="display: none; margin-top: 30px;">
         <h3>Ваши предпочтения</h3>
         <form id="fullQuestionnaire">
@@ -117,21 +116,20 @@
             </select>
           </div>
           <div class="form-group">
-            <label>Есть ли вам где остановиться в Казани?</label>
-            <select name="accommodation">
-              <option value="Да">Да</option>
-              <option value="Нет">Нет</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label>Останетесь ли вы с нами праздновать торжество на следующий день?</label>
+            <label>Присоединитесь ли вы к нам праздновать торжество на следующий день?</label>
             <select name="nextDay">
               <option value="Да">Да</option>
               <option value="Нет">Нет</option>
             </select>
           </div>
+          <div class="form-group">
+            <label>Останетесь вы на ночь после торжества?</label>
+            <select name="overnight">
+              <option value="Да">Да</option>
+              <option value="Нет">Нет</option>
+            </select>
+          </div>
 
-          <!-- Блок для добавления дополнительных анкет -->
           <div id="companionsContainer"></div>
           <button type="button" id="addCompanionBtn" class="small-btn" style="background: #4A5D3E;">
             <i class="fas fa-user-plus"></i> Добавить анкету
@@ -154,7 +152,7 @@
     <div class="schedule-grid">
       <div class="schedule-item">
         <strong>16:20</strong><br>Торжественная регистрация брака<br><small>ул. Болотникова, д.35а</small><br>
-        <span class="desc">Наша регистрация пройдет в залах ЗАГСа Кировского района. Количество мест ограничено, поэтому мы будем рады видеть тех, кто очень хочет разделить этот момент и не устал после дороги. Остальных ждём на фуршете!</span>
+        <span class="desc">Наша регистрация пройдет в залах ЗАГСа Кировского района только для узкого круга (ввиду ограниченного количества мест). Остальные гости могут подъехать в гостевой дом к 16:00 (просим вас находиться на втором этаже в спальной части дома — там можно переодеться, собраться, чтобы не мешать подрядчикам, которые готовят банкетный зал).</span>
       </div>
       <div class="schedule-item">
         <strong>17:00</strong><br>Фуршет<br><small>Банкетный зал ул. Деметьева 51</small><br>
@@ -170,7 +168,7 @@
       </div>
       <div class="schedule-item">
         <strong>23:00</strong><br>Окончание основного дня<br>
-        <span class="desc">А после мы приглашаем самых стойких продолжить праздник на второй день — будем рады, если вы останетесь с нами!</span>
+        <span class="desc">Приглашаем самых стойких продолжить праздник на второй день в неформальной обстановке. P.S. захватите с собой купальники и плавки.</span>
       </div>
     </div>
     <div id="map" style="height:300px; margin: 30px 0;"></div>
