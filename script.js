@@ -1,5 +1,4 @@
 document.addEventListener('DOMContentLoaded', function() {
-  // ========== ТАЙМЕР ==========
   const weddingDate = new Date("August 28, 2026 18:00:00").getTime();
   function updateCountdown() {
     const now = new Date().getTime();
@@ -19,7 +18,6 @@ document.addEventListener('DOMContentLoaded', function() {
   setInterval(updateCountdown, 1000);
   updateCountdown();
 
-  // ========== КАРТА ==========
   function initMap() {
     if (typeof ymaps === 'undefined') return;
     ymaps.ready(() => {
@@ -30,7 +28,6 @@ document.addEventListener('DOMContentLoaded', function() {
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initMap);
   else initMap();
 
-  // ========== ПРЕДВАРИТЕЛЬНЫЙ ОТВЕТ ==========
   let currentGuestId = null;
   const preForm = document.getElementById('preRsvpForm');
   const preMsg = document.getElementById('preMsg');
@@ -65,7 +62,6 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 
-  // ========== ДОБАВЛЕНИЕ АНКЕТ (нумерация с 2) ==========
   const companionsContainer = document.getElementById('companionsContainer');
   let companionCounter = 2;
 
@@ -96,7 +92,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   });
 
-  // ========== ОТПРАВКА АНКЕТЫ ==========
   const fullForm = document.getElementById('fullQuestionnaire');
   const qMsg = document.getElementById('questionnaireMsg');
   if (fullForm) {
@@ -151,21 +146,26 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 
-  // ========== КАЛЕНДАРЬ ==========
-  document.getElementById('addToCalendarBtn')?.addEventListener('click', () => {
-    const start = new Date(2026,7,28,18,0,0);
-    const end = new Date(2026,7,28,23,0,0);
-    const fmt = d => d.toISOString().replace(/[-:]/g,'').split('.')[0]+'Z';
-    const ics = `BEGIN:VCALENDAR\nVERSION:2.0\nBEGIN:VEVENT\nUID:${Date.now()}@wedding\nDTSTAMP:${fmt(new Date())}\nDTSTART:${fmt(start)}\nDTEND:${fmt(end)}\nSUMMARY:Свадьба Алексея и Регины\nDESCRIPTION:Гостевой дом "Чайковский", ул. Деметьева 51, Казань\nLOCATION:ул. Деметьева 51, Казань\nEND:VEVENT\nEND:VCALENDAR`;
-    const blob = new Blob([ics], {type:'text/calendar'});
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = 'wedding.ics';
-    link.click();
-    URL.revokeObjectURL(link.href);
-  });
+  // КАЛЕНДАРЬ С ПОДСКАЗКОЙ ДЛЯ ANDROID
+  const calendarBtn = document.getElementById('addToCalendarBtn');
+  if (calendarBtn) {
+    calendarBtn.addEventListener('click', () => {
+      const start = new Date(2026,7,28,18,0,0);
+      const end = new Date(2026,7,28,23,0,0);
+      const fmt = d => d.toISOString().replace(/[-:]/g,'').split('.')[0]+'Z';
+      const ics = `BEGIN:VCALENDAR\nVERSION:2.0\nBEGIN:VEVENT\nUID:${Date.now()}@wedding\nDTSTAMP:${fmt(new Date())}\nDTSTART:${fmt(start)}\nDTEND:${fmt(end)}\nSUMMARY:Свадьба Алексея и Регины\nDESCRIPTION:Гостевой дом "Чайковский", ул. Деметьева 51, Казань\nLOCATION:ул. Деметьева 51, Казань\nEND:VEVENT\nEND:VCALENDAR`;
+      const blob = new Blob([ics], {type:'text/calendar'});
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = 'wedding.ics';
+      link.click();
+      URL.revokeObjectURL(link.href);
+      if (/android/i.test(navigator.userAgent)) {
+        alert('Файл календаря скачан. Откройте его в приложении "Google Календарь" или другом календаре, чтобы добавить событие.');
+      }
+    });
+  }
 
-  // ========== МУЗЫКА ==========
   const audio = document.getElementById('weddingAudio');
   const musicBtn = document.getElementById('playMusicBtn');
   if (audio && musicBtn) {
@@ -177,7 +177,6 @@ document.addEventListener('DOMContentLoaded', function() {
     };
   }
 
-  // ========== КОНФЕТТИ ==========
   function fireConfetti() {
     const colors = ['#FFD700','#FF69B4','#FFFFFF','#9B6B5C','#C5E0B4'];
     for(let i=0; i<120; i++) {
