@@ -2,205 +2,139 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <title>Админка свадьбы – все анкеты</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Админка свадьбы – управление анкетами</title>
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
     body {
-      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-      background: #f0f2f5;
-      padding: 20px;
+      font-family: system-ui, 'Segoe UI', Roboto, sans-serif;
+      background: #eef2f0;
+      padding: 24px;
     }
     .container {
-      max-width: 1300px;
+      max-width: 1400px;
       margin: 0 auto;
     }
     h1 {
-      color: #4A5D3E;
+      color: #2c3e2f;
       border-left: 5px solid #9B6B5C;
       padding-left: 16px;
-      margin-bottom: 24px;
+      margin-bottom: 20px;
     }
-    .toolbar {
-      margin: 20px 0;
-      text-align: right;
+    .table-wrapper {
+      overflow-x: auto;
+      background: white;
+      border-radius: 24px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+      padding: 4px 0;
     }
-    button {
-      background: #9B6B5C;
-      color: white;
-      border: none;
-      padding: 8px 16px;
-      border-radius: 40px;
-      cursor: pointer;
-      font-size: 0.9rem;
-    }
-    button:hover { background: #7a4e42; }
     table {
       width: 100%;
       border-collapse: collapse;
-      background: white;
-      border-radius: 20px;
-      overflow: hidden;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      font-size: 0.9rem;
     }
     th, td {
       padding: 12px 10px;
       text-align: left;
-      border-bottom: 1px solid #e2e2e2;
-      vertical-align: middle;
+      border-bottom: 1px solid #e2e6e9;
+      vertical-align: top;
     }
     th {
-      background: #f3f1ea;
+      background: #f7f5ef;
+      color: #2c3e2f;
       font-weight: 600;
+      position: sticky;
+      top: 0;
+    }
+    tr:hover {
+      background: #faf7f0;
+    }
+    .badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 30px;
+      font-size: 0.75rem;
+      font-weight: 500;
+    }
+    .badge-main {
+      background: #9B6B5C;
+      color: white;
+    }
+    .badge-companion {
+      background: #cbc3b0;
       color: #2c3e2f;
     }
-    .guest-row-main {
-      background-color: #fef7e8;
-    }
-    .guest-row-companion {
-      background-color: #faf8f3;
-    }
     .delete-btn {
-      background: #d9534f;
-      color: white;
+      background: none;
       border: none;
-      padding: 6px 12px;
-      border-radius: 20px;
+      color: #b33;
+      font-size: 1.2rem;
       cursor: pointer;
-      font-size: 0.75rem;
+      padding: 4px 8px;
+      border-radius: 30px;
+      transition: 0.2s;
     }
     .delete-btn:hover {
-      background: #c9302c;
+      background: #ffe0e0;
+      color: #d00;
     }
-    .note {
-      margin-top: 20px;
+    .parent-link {
       font-size: 0.8rem;
-      color: #666;
-      text-align: center;
+      color: #6b8c5c;
     }
-    .loading {
+    .empty-row td {
       text-align: center;
       padding: 40px;
+      color: #888;
+      font-style: italic;
+    }
+    footer {
+      text-align: center;
+      margin-top: 24px;
+      font-size: 0.75rem;
+      color: #6c7c6a;
+    }
+    @media (max-width: 800px) {
+      th, td { padding: 8px 6px; font-size: 0.8rem; }
+      .delete-btn { font-size: 1rem; }
     }
   </style>
 </head>
 <body>
 <div class="container">
-  <h1>📋 Все анкеты (основные + дополнительные)</h1>
-  <div class="toolbar">
-    <button id="refreshBtn">⟳ Обновить</button>
+  <h1>📋 Управление анкетами гостей</h1>
+  <div class="table-wrapper">
+    <table id="allAnswersTable">
+      <thead>
+        <tr>
+          <th>Тип</th><th>Имя</th><th>Придёт?</th><th>Трансфер</th><th>Алкоголь</th><th>След. день</th><th>Ночёвка</th><th>Диета</th><th>Дата ответа</th><th>Родитель</th><th>Действие</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody">
+        <tr class="empty-row"><td colspan="11">Загрузка данных...</td></tr>
+      </tbody>
+    </table>
   </div>
-  <div id="tableContainer">Загрузка...</div>
-  <div class="note">🔹 Жёлтые строки – основная анкета. 🔹 Светлые строки – дополнительная анкета. Кнопка удаляет только эту анкету.</div>
+  <footer>Нажмите «🗑», чтобы удалить анкету (основная анкета удалится вместе со всеми связанными дополнительными)</footer>
 </div>
 
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 <script src="firebase-config.js"></script>
 <script>
-  const db = firebase.firestore();
+  // db уже объявлена в firebase-config.js – используем её
 
-  async function loadAllData() {
-    const container = document.getElementById('tableContainer');
-    container.innerHTML = '<div class="loading">Загрузка...</div>';
-    try {
-      const guestsSnapshot = await db.collection("guests").orderBy("timestamp", "desc").get();
-      if (guestsSnapshot.empty) {
-        container.innerHTML = '<p>Нет данных</p>';
-        return;
-      }
-      let rowsHtml = '';
-      for (const guestDoc of guestsSnapshot.docs) {
-        const g = guestDoc.data();
-        const guestId = guestDoc.id;
-        // Основная строка
-        rowsHtml += `
-          <tr class="guest-row-main" data-guest-id="${guestId}" data-companion-id="">
-            <td><strong>${escapeHtml(g.name || 'Без имени')}</strong></td>
-            <td>${g.attending ? '✅ Да' : '❌ Нет'}</td>
-            <td>${escapeHtml(g.transfer || '—')}</td>
-            <td>${escapeHtml(g.alcohol || '—')}</td>
-            <td>${escapeHtml(g.nextDay || '—')}</td>
-            <td>${escapeHtml(g.overnight || '—')}</td>
-            <td>${escapeHtml(g.diet || '—')}</td>
-            <td><button class="delete-btn" data-type="main" data-id="${guestId}">🗑️ Удалить</button></td>
-          </tr>
-        `;
-        // Загружаем companions
-        const companionsSnap = await guestDoc.ref.collection("companions").orderBy("timestamp", "desc").get();
-        for (const compDoc of companionsSnap.docs) {
-          const c = compDoc.data();
-          const compId = compDoc.id;
-          rowsHtml += `
-            <tr class="guest-row-companion" data-guest-id="${guestId}" data-companion-id="${compId}">
-              <td><em>${escapeHtml(c.name || 'Без имени')}</em> <span style="font-size:0.7rem;">(доп.)</span></td>
-              <td>—</td>
-              <td>${escapeHtml(c.transfer || '—')}</td>
-              <td>${escapeHtml(c.alcohol || '—')}</td>
-              <td>${escapeHtml(c.nextDay || '—')}</td>
-              <td>${escapeHtml(c.overnight || '—')}</td>
-              <td>${escapeHtml(c.diet || '—')}</td>
-              <td><button class="delete-btn" data-type="companion" data-guest-id="${guestId}" data-companion-id="${compId}">🗑️ Удалить</button></td>
-            </tr>
-          `;
-        }
-      }
-      const tableHtml = `
-        <table>
-          <thead>
-            <tr>
-              <th>Имя</th><th>Придёт?</th><th>Трансфер</th><th>Алкоголь</th><th>След. день</th><th>Ночёвка</th><th>Диета</th><th>Действие</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${rowsHtml}
-          </tbody>
-        </table>
-      `;
-      container.innerHTML = tableHtml;
-      // Подключаем обработчики кнопок удаления
-      document.querySelectorAll('.delete-btn').forEach(btn => {
-        btn.addEventListener('click', async (e) => {
-          e.stopPropagation();
-          const type = btn.getAttribute('data-type');
-          if (type === 'main') {
-            const guestId = btn.getAttribute('data-id');
-            if (confirm('Удалить основную анкету и всех её близких? Это действие необратимо.')) {
-              try {
-                // Удаляем всех companions подколлекции
-                const guestRef = db.collection("guests").doc(guestId);
-                const companions = await guestRef.collection("companions").get();
-                const batch = db.batch();
-                companions.forEach(doc => batch.delete(doc.ref));
-                batch.delete(guestRef);
-                await batch.commit();
-                alert('Удалено');
-                loadAllData(); // обновить таблицу
-              } catch(err) {
-                alert('Ошибка: ' + err.message);
-              }
-            }
-          } else if (type === 'companion') {
-            const guestId = btn.getAttribute('data-guest-id');
-            const companionId = btn.getAttribute('data-companion-id');
-            if (confirm('Удалить дополнительную анкету?')) {
-              try {
-                await db.collection("guests").doc(guestId).collection("companions").doc(companionId).delete();
-                alert('Удалено');
-                loadAllData();
-              } catch(err) {
-                alert('Ошибка: ' + err.message);
-              }
-            }
-          }
-        });
-      });
-    } catch (err) {
-      container.innerHTML = `<p style="color:red;">Ошибка: ${err.message}</p>`;
-    }
+  function formatDate(ts) {
+    if (!ts || !ts.toDate) return '—';
+    return ts.toDate().toLocaleString('ru-RU', {day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit'});
   }
 
   function escapeHtml(str) {
-    if (!str) return '';
+    if (str === undefined || str === null) return '';
     return String(str).replace(/[&<>]/g, function(m) {
       if (m === '&') return '&amp;';
       if (m === '<') return '&lt;';
@@ -209,8 +143,113 @@
     });
   }
 
-  document.getElementById('refreshBtn').addEventListener('click', () => loadAllData());
-  loadAllData();
+  // Загрузка и отображение всех анкет (основные + companions) в одной таблице
+  async function loadAllAnswers() {
+    const tbody = document.getElementById('tableBody');
+    tbody.innerHTML = '<tr class="empty-row"><td colspan="11">Загрузка...</td></tr>';
+
+    try {
+      const guestsSnapshot = await db.collection("guests").orderBy("timestamp", "desc").get();
+      if (guestsSnapshot.empty) {
+        tbody.innerHTML = '<tr class="empty-row"><td colspan="11">Пока нет ответов 😢</td></tr>';
+        return;
+      }
+
+      let rowsHtml = '';
+
+      for (const guestDoc of guestsSnapshot.docs) {
+        const g = guestDoc.data();
+        const guestId = guestDoc.id;
+        const guestTimestamp = g.timestamp;
+
+        // Строка для ОСНОВНОЙ АНКЕТЫ
+        rowsHtml += `
+          <tr data-type="main" data-id="${guestId}">
+            <td><span class="badge badge-main">Основной</span></td>
+            <td><strong>${escapeHtml(g.name)}</strong></td>
+            <td>${g.attending ? '✅ Да' : '❌ Нет'}</td>
+            <td>${escapeHtml(g.transfer)}</td>
+            <td>${escapeHtml(g.alcohol)}</td>
+            <td>${escapeHtml(g.nextDay)}</td>
+            <td>${escapeHtml(g.overnight)}</td>
+            <td>${escapeHtml(g.diet)}</td>
+            <td>${formatDate(guestTimestamp)}</td>
+            <td>—</td>
+            <td><button class="delete-btn" data-type="main" data-id="${guestId}" title="Удалить основную анкету и всех её близких">🗑</button></td>
+          </tr>
+        `;
+
+        // Загружаем подколлекцию companions данного гостя
+        const companionsSnap = await guestDoc.ref.collection("companions").orderBy("timestamp", "asc").get();
+        for (const compDoc of companionsSnap.docs) {
+          const c = compDoc.data();
+          const compId = compDoc.id;
+          rowsHtml += `
+            <tr data-type="companion" data-parent="${guestId}" data-id="${compId}">
+              <td><span class="badge badge-companion">Дополнительная</span></td>
+              <td><strong>${escapeHtml(c.name)}</strong></td>
+              <td>—</td>
+              <td>${escapeHtml(c.transfer)}</td>
+              <td>${escapeHtml(c.alcohol)}</td>
+              <td>${escapeHtml(c.nextDay)}</td>
+              <td>${escapeHtml(c.overnight)}</td>
+              <td>${escapeHtml(c.diet)}</td>
+              <td>${formatDate(c.timestamp)}</td>
+              <td class="parent-link">${escapeHtml(g.name)}</td>
+              <td><button class="delete-btn" data-type="companion" data-parent="${guestId}" data-id="${compId}" title="Удалить только эту дополнительную анкету">🗑</button></td>
+            </tr>
+          `;
+        }
+      }
+
+      tbody.innerHTML = rowsHtml;
+
+      // Навесить обработчики на кнопки удаления
+      document.querySelectorAll('.delete-btn').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+          e.stopPropagation();
+          const type = btn.dataset.type;
+          const guestId = btn.dataset.parent || btn.dataset.id; // для main dataset.id = guestId
+          const companionId = btn.dataset.id;
+
+          let confirmMsg = '';
+          if (type === 'main') {
+            confirmMsg = 'Удалить основную анкету вместе со всеми дополнительными? Это действие необратимо.';
+          } else {
+            confirmMsg = 'Удалить только эту дополнительную анкету?';
+          }
+          if (!confirm(confirmMsg)) return;
+
+          try {
+            if (type === 'main') {
+              // Удаляем весь документ гостя (подколлекция companions удалится автоматически благодаря каскадному удалению, но Firestore не удаляет подколлекции автоматически – нужно удалить подколлекцию вручную)
+              const guestRef = db.collection("guests").doc(guestId);
+              // удаляем всех companions
+              const comps = await guestRef.collection("companions").get();
+              const batch = db.batch();
+              comps.forEach(doc => batch.delete(doc.ref));
+              batch.delete(guestRef);
+              await batch.commit();
+            } else {
+              // Удаляем только один документ из подколлекции
+              const companionRef = db.collection("guests").doc(guestId).collection("companions").doc(companionId);
+              await companionRef.delete();
+            }
+            // После удаления перезагружаем таблицу
+            await loadAllAnswers();
+          } catch (err) {
+            console.error(err);
+            alert('Ошибка при удалении: ' + err.message);
+          }
+        });
+      });
+    } catch (err) {
+      console.error(err);
+      tbody.innerHTML = `<tr class="empty-row"><td colspan="11">Ошибка загрузки: ${err.message}</td></tr>`;
+    }
+  }
+
+  loadAllAnswers();
 </script>
 </body>
 </html>
