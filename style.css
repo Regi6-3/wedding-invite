@@ -192,7 +192,7 @@ body {
 .palette-image img {
   max-width: 35%;
   height: auto;
-  border-radius: 24px !important;
+  border-radius: 0 !important;
   box-shadow: 0 4px 12px rgba(0,0,0,0.1);
 }
 
@@ -321,7 +321,7 @@ body {
 }
 .schedule-item strong {
   font-size: 1.3rem;
-  color: #9B6B5C;
+  color: #E6C28F;   /* ← изменён цвет цифр */
 }
 .schedule-item .desc {
   font-size: 0.9rem;
@@ -353,18 +353,18 @@ body {
   font-size: 1rem;
 }
 .group-chat-block a {
-  color: #E6C28F;
+  color: white;
   text-decoration: none;
-  word-break: break-all;
   display: inline-block;
-  background: rgba(0,0,0,0.5);
-  padding: 8px 16px;
-  border-radius: 40px;
+  background: #9B6B5C;
+  padding: 10px 24px;
+  border-radius: 60px;
   transition: 0.2s;
+  font-weight: 500;
 }
 .group-chat-block a:hover {
-  background: #9B6B5C;
-  color: white;
+  background: #7a4e42;
+  transform: translateY(-2px);
 }
 
 footer {
