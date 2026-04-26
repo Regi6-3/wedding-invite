@@ -328,6 +328,43 @@ body {
   margin-top: 8px;
   opacity: 0.9;
 }
+
+/* ГРУППОВОЙ ЧАТ */
+.group-chat {
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 24px;
+  padding: 20px;
+  margin: 30px 0 0;
+  text-align: center;
+}
+.group-chat h3 {
+  font-family: 'Great Vibes', cursive;
+  font-size: 2rem;
+  color: #9B6B5C;
+  margin-bottom: 15px;
+}
+.group-chat h3 i {
+  margin-right: 10px;
+}
+.group-chat p {
+  font-size: 1rem;
+  margin-bottom: 10px;
+}
+.group-chat a {
+  color: #E6C28F;
+  text-decoration: none;
+  word-break: break-all;
+  display: inline-block;
+  background: rgba(0,0,0,0.5);
+  padding: 8px 16px;
+  border-radius: 40px;
+  transition: 0.2s;
+}
+.group-chat a:hover {
+  background: #9B6B5C;
+  color: white;
+}
+
 footer {
   text-align: center;
   padding: 20px;
