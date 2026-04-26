@@ -7,7 +7,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Roboto:wght@300;400;500&family=Cormorant+Infant:wght@300;400;600;700&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-  <link rel="stylesheet" href="style.css?v=7">
+  <link rel="stylesheet" href="style.css?v=8">
 </head>
 <body>
 
@@ -61,23 +61,18 @@
 
       <div class="love-quote-under-photo">Там, где посеяна любовь, растёт радость.</div>
 
-      <!-- Меню -->
       <p class="main-text"><strong class="cormorant-header">Меню</strong><br>
       Меню разнообразно, поэтому сообщите нам заранее, если у вас есть какие-либо предпочтения или диетические ограничения. После подтверждения вы сможете пройти опрос о своих вкусовых предпочтениях и напитках.</p>
 
-      <!-- Пожелания -->
       <p class="main-text"><strong class="cormorant-header">Пожелания</strong><br>
       Нам бы хотелось, чтобы в этот день сердца были лёгкими, души - открытыми, настроение - праздничным, а подарки - упакованными в конверты.</p>
 
-      <!-- Примечание -->
       <p class="main-text"><strong class="cormorant-header">Примечание</strong><br>
       Будем благодарны, если вы воздержитесь от криков "Горько" на празднике, ведь поцелуй — это знак выражения чувств, он не может быть по заказу.</p>
 
-      <!-- Подтверждение -->
       <p class="main-text"><strong class="cormorant-header">Подтверждение</strong><br>
       Пожалуйста, подтвердите свое присутствие до <u>01.08.2026</u>.</p>
 
-      <!-- Дресс-код (палитра) -->
       <p class="main-text"><strong class="cormorant-header">Дресс-код</strong><br>
       Мы будем рады, если вы поддержите нашу цветовую палитру.</p>
       <div class="palette-image">
@@ -86,7 +81,6 @@
 
       <p class="closing">Ждём Вас на нашей свадьбе!</p>
 
-      <!-- Предварительная форма -->
       <form id="preRsvpForm">
         <input type="text" id="guestName" placeholder="Ваше имя" required>
         <select id="preAttending" required>
@@ -98,7 +92,6 @@
       </form>
       <div id="preMsg"></div>
 
-      <!-- ОСНОВНАЯ АНКЕТА -->
       <div id="questionnaireBlock" style="display: none; margin-top: 30px;">
         <h3>Ваши предпочтения</h3>
         <form id="fullQuestionnaire">
@@ -183,16 +176,19 @@
         <span class="desc">Приглашаем самых стойких продолжить праздник на второй день в неформальной обстановке. P.S. захватите с собой купальники и плавки.</span>
       </div>
     </div>
-    <div id="map" style="height:300px; margin: 30px 0;"></div>
 
     <!-- ГРУППОВОЙ ЧАТ -->
-    <div class="group-chat">
-      <h3><i class="fab fa-vk"></i> Групповой чат</h3>
-      <p>По возникшим вопросам и в будущем для обмена фотографиями пишите в чате:</p>
-      <a href="https://vk.me/join/ZcxVVAa1zuxv3LIfOL3_99GTj5PULt7XpTQ=" target="_blank" rel="noopener noreferrer">
-        https://vk.me/join/ZcxVVAa1zuxv3LIfOL3_99GTj5PULt7XpTQ=
-      </a>
+    <div class="group-chat-wrapper">
+      <div class="group-chat-title">Групповой чат</div>
+      <div class="group-chat-block">
+        <p>По возникшим вопросам и в будущем для обмена фотографиями пишите в чате:</p>
+        <a href="https://vk.me/join/ZcxVVAa1zuxv3LIfOL3_99GTj5PULt7XpTQ=" target="_blank" rel="noopener noreferrer">
+          https://vk.me/join/ZcxVVAa1zuxv3LIfOL3_99GTj5PULt7XpTQ=
+        </a>
+      </div>
     </div>
+
+    <div id="map" style="height:300px; margin: 30px 0;"></div>
   </div>
 </div>
 
