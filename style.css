@@ -1,4 +1,384 @@
-/* ... все прежние стили ... */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Roboto', sans-serif;
+  font-size: 16px;
+  color: #000;
+}
+
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.light-bg {
+  background: #c0cea3;
+  padding: 20px 0;
+}
+
+.name-caption, .plus-sign, .heart-equation {
+  font-family: 'Great Vibes', cursive;
+  font-weight: normal;
+}
+
+.photo-card {
+  background: white;
+  border-radius: 0;
+  padding: 20px 15px;
+  margin: 20px auto;
+  width: fit-content;
+  max-width: 280px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s, opacity 0.6s;
+  opacity: 0;
+  transform: translateY(20px);
+  animation: fadeInUp 0.6s forwards;
+}
+.photo-card:nth-child(1) { animation-delay: 0.1s; }
+.photo-card:nth-child(3) { animation-delay: 0.2s; }
+@keyframes fadeInUp {
+  to { opacity: 1; transform: translateY(0); }
+}
+.photo-name-block {
+  text-align: center;
+}
+.portrait {
+  width: 200px;
+  height: 200px;
+  object-fit: cover;
+  border-radius: 0;
+  display: block;
+  margin: 0 auto;
+}
+.name-caption {
+  font-size: 1.6rem;
+  margin-top: 12px;
+  color: #000;
+}
+
+.plus-sign {
+  text-align: center;
+  font-size: 3rem;
+  margin: 10px 0;
+}
+.heart-equation {
+  text-align: center;
+  font-size: 2.2rem;
+  margin: 20px 0;
+  color: black;
+}
+
+.wedding-date-big {
+  text-align: center;
+  font-family: 'Cormorant Infant', serif;
+  font-weight: 400;
+  font-size: 1.2rem;
+  margin: 20px 0 10px;
+  letter-spacing: 2px;
+}
+
+.countdown {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 30px;
+}
+.countdown div {
+  background: none;
+  color: #000;
+  text-align: center;
+  font-weight: bold;
+  font-family: 'Cormorant Infant', serif;
+  font-weight: 700;
+  font-size: 1rem;
+  flex: 0 0 auto;
+  min-width: 55px;
+}
+.countdown span {
+  font-size: 1.8rem;
+  font-weight: 700;
+  display: block;
+  font-family: 'Cormorant Infant', serif;
+}
+
+.top-buttons {
+  display: flex;
+  justify-content: space-between;
+  margin: 0 0 30px 0;
+}
+.calendar-btn, .music-btn {
+  background: #9B6B5C;
+  border: none;
+  color: white;
+  padding: 6px 12px;
+  border-radius: 40px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-family: 'Roboto', sans-serif;
+  transition: background 0.2s;
+}
+.calendar-btn:hover, .music-btn:hover {
+  background: #7a4e42;
+}
+
+.white-card {
+  background: white;
+  border-radius: 0;
+  padding: 24px;
+  margin: 20px 0;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+  color: #000;
+  text-align: center;
+}
+.cormorant-text, .main-text {
+  font-family: 'Cormorant Infant', serif;
+  font-weight: 300;
+  font-size: 1.1rem;
+  line-height: 1.5;
+}
+.main-text strong {
+  font-weight: 600;
+}
+.greeting {
+  font-family: 'Great Vibes', cursive;
+  font-size: 2rem;
+  margin-bottom: 20px;
+}
+.cormorant-header {
+  font-family: 'Cormorant Infant', serif;
+  font-weight: 300;
+  font-size: 1.3rem;
+  display: inline-block;
+  margin-bottom: 10px;
+}
+.love-quote-under-photo {
+  font-family: 'Great Vibes', cursive;
+  font-size: 1.2rem;
+  color: black;
+  text-align: center;
+  margin: 5px 0 15px 0;
+}
+.closing {
+  font-family: 'Great Vibes', cursive;
+  font-size: 2rem;
+  margin: 20px 0;
+}
+.small-note {
+  font-size: 0.8rem;
+  margin-top: 8px;
+  color: #555;
+}
+.small-photo {
+  text-align: center;
+  margin: 20px 0;
+}
+.small-photo img {
+  width: 200px;
+  height: 200px;
+  object-fit: cover;
+  border-radius: 0;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+.palette-image {
+  text-align: center;
+  margin: 15px 0;
+}
+.palette-image img {
+  max-width: 35%;
+  height: auto;
+  border-radius: 0 !important;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+/* ===== КНОПКИ ===== */
+.small-btn, .full-btn {
+  background: #9B6B5C;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 60px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-family: 'Roboto', sans-serif;
+  transition: background 0.2s;
+}
+.small-btn:hover, .full-btn:hover {
+  background: #7a4e42;
+}
+#addCompanionBtn {
+  background: #4A5D3E;
+  margin-top: 10px;
+}
+#addCompanionBtn:hover {
+  background: #2c3e2f;
+}
+.remove-companion {
+  background: #d9c5b2;
+  border: none;
+  padding: 5px 12px;
+  border-radius: 40px;
+  cursor: pointer;
+  margin-top: 10px;
+  color: #4a2e2e;
+}
+.remove-companion:hover {
+  background: #c4ae98;
+}
+
+/* ===== ДОПОЛНИТЕЛЬНЫЕ АНКЕТЫ ===== */
+.companion-block {
+  background: transparent;
+  margin: 20px 0;
+  padding: 0;
+  border: none;
+  box-shadow: none;
+}
+.companion-block h4 {
+  color: #4A5D3E;
+  margin: 0 0 12px 0;
+  font-family: 'Playfair Display', serif;
+  font-size: 1.3rem;
+  text-align: left;
+}
+
+/* ===== ОБЩИЕ СТИЛИ ДЛЯ ВСЕХ ПОЛЕЙ ===== */
+.form-group {
+  margin-bottom: 20px;
+  text-align: left;
+}
+.form-group label {
+  display: block;
+  font-weight: normal;
+  margin-bottom: 6px;
+  font-size: 1rem;
+  color: #2c3e2f;
+}
+#preRsvpForm input,
+#preRsvpForm select {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid #ccc;
+  border-radius: 16px;
+  background: #fff;
+  font-size: 1rem;
+  font-family: 'Roboto', sans-serif;
+  margin-bottom: 12px;
+  box-sizing: border-box;
+}
+#fullQuestionnaire select,
+#fullQuestionnaire input[type="text"],
+.companion-block select,
+.companion-block input[type="text"] {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid #ccc;
+  border-radius: 16px;
+  background: #fff;
+  font-size: 1rem;
+  font-family: inherit;
+  box-sizing: border-box;
+}
+#preRsvpForm input:focus,
+#preRsvpForm select:focus,
+#fullQuestionnaire select:focus,
+#fullQuestionnaire input:focus,
+.companion-block select:focus,
+.companion-block input:focus {
+  outline: none;
+  border-color: #9B6B5C;
+  box-shadow: 0 0 0 2px rgba(155,107,92,0.2);
+}
+
+.dark-bg {
+  background: #4A5D3E;
+  padding: 40px 0;
+  color: white;
+}
+.schedule-title {
+  text-align: center;
+  font-family: 'Great Vibes', cursive;
+  font-size: 2.5rem;
+  margin-bottom: 30px;
+  font-weight: normal;
+  color: #E6C28F;
+}
+.schedule-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.schedule-item {
+  background: rgba(0,0,0,0.3);
+  border-radius: 24px;
+  padding: 16px;
+  line-height: 1.4;
+}
+.schedule-item strong {
+  font-size: 1.3rem;
+  color: #9B6B5C;
+}
+.schedule-item .desc {
+  font-size: 0.9rem;
+  display: block;
+  margin-top: 8px;
+  opacity: 0.9;
+}
+
+.group-chat-wrapper {
+  margin: 30px 0 20px;
+}
+.group-chat-title {
+  text-align: center;
+  font-family: 'Great Vibes', cursive;
+  font-size: 2.5rem;
+  margin-bottom: 20px;
+  font-weight: normal;
+  color: #E6C28F;
+}
+.group-chat-block {
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 24px;
+  padding: 20px;
+  text-align: center;
+}
+.group-chat-block p {
+  margin-bottom: 12px;
+  font-size: 1rem;
+}
+.group-chat-block a {
+  color: white;
+  text-decoration: none;
+  display: inline-block;
+  background: #9B6B5C;
+  padding: 10px 24px;
+  border-radius: 60px;
+  transition: 0.2s;
+  font-weight: 500;
+}
+.group-chat-block a:hover {
+  background: #7a4e42;
+  transform: translateY(-2px);
+}
+
+footer {
+  text-align: center;
+  padding: 20px;
+  background: #2E3824;
+  color: white;
+  font-family: 'Great Vibes', cursive;
+  font-size: 1.8rem;
+  letter-spacing: 1px;
+}
+#map {
+  border-radius: 0;
+  margin: 30px 0;
+}
 
 /* ===== ЛАЙТБОКС ДЛЯ ФОТО ===== */
 .lightbox {
