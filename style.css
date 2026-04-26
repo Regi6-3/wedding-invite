@@ -321,7 +321,7 @@ body {
 }
 .schedule-item strong {
   font-size: 1.3rem;
-  color: #E6C28F;   /* ← изменён цвет цифр */
+  color: #9B6B5C;   /* ← ВОЗВРАЩЁН ПРЕЖНИЙ ЦВЕТ */
 }
 .schedule-item .desc {
   font-size: 0.9rem;
