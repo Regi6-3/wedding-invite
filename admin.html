@@ -11,6 +11,7 @@
     th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
     th { background: #f3f1ea; }
     .info { margin-bottom: 15px; }
+    .warning { color: #c45; font-style: italic; }
   </style>
 </head>
 <body>
@@ -24,18 +25,35 @@
     const container = document.getElementById('allGuests');
     try {
       const snapshot = await db.collection("guests").orderBy("timestamp", "desc").get();
-      if (snapshot.empty) { container.innerHTML = '<p>Нет ответов</p>'; return; }
+      if (snapshot.empty) {
+        container.innerHTML = '<p>Нет ответов</p>';
+        return;
+      }
       let html = '';
       for (const guestDoc of snapshot.docs) {
         const g = guestDoc.data();
         html += `<div class="guest-card">
           <h2>${g.name || 'Без имени'}</h2>
           <div class="info">✅ ${g.attending ? 'Придёт' : 'Не придёт'} | 📅 ${g.timestamp?.toDate().toLocaleString() || '—'}</div>
-          <div class="info"><strong>Основная анкета:</strong> Трансфер: ${g.transfer || '—'}, Алкоголь: ${g.alcohol || '—'}, След. день: ${g.nextDay || '—'}, Ночёвка: ${g.overnight || '—'}, Диета: ${g.diet || '—'}</div>`;
+          <div class="info"><strong>Основная анкета:</strong> 
+            Трансфер: ${g.transfer || '—'}, 
+            Алкоголь: ${g.alcohol || '—'}, 
+            След. день: ${g.nextDay || '—'}, 
+            Ночёвка: ${g.overnight || '—'}, 
+            Диета: ${g.diet || '—'}
+          </div>`;
+
+        // Подколлекция companions
         const compSnap = await guestDoc.ref.collection("companions").orderBy("timestamp").get();
         if (!compSnap.empty) {
           html += `<h3>📄 Дополнительные анкеты (${compSnap.size})</h3>
-          <table><thead><tr><th>Имя</th><th>Трансфер</th><th>Алкоголь</th><th>След. день</th><th>Ночёвка</th><th>Диета</th></tr></thead><tbody>`;
+          <table class="companion-table">
+            <thead>
+              <tr>
+                <th>Имя</th><th>Трансфер</th><th>Алкоголь</th><th>След. день</th><th>Ночёвка</th><th>Диета</th>
+              </tr>
+            </thead>
+            <tbody>`;
           compSnap.forEach(c => {
             const comp = c.data();
             html += `<tr>
@@ -54,7 +72,10 @@
         html += `</div>`;
       }
       container.innerHTML = html;
-    } catch (err) { container.innerHTML = `<p>Ошибка: ${err.message}</p>`; }
+    } catch (err) {
+      container.innerHTML = `<p class="warning">Ошибка: ${err.message}</p>`;
+      console.error(err);
+    }
   }
   loadAllGuests();
 </script>
