@@ -146,7 +146,6 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 
-  // КАЛЕНДАРЬ С ПОДСКАЗКОЙ ДЛЯ ANDROID
   const calendarBtn = document.getElementById('addToCalendarBtn');
   if (calendarBtn) {
     calendarBtn.addEventListener('click', () => {
@@ -192,4 +191,29 @@ document.addEventListener('DOMContentLoaded', function() {
     style.textContent = '@keyframes fall { 0% { transform: translateY(0) rotate(0deg); opacity: 1; } 100% { transform: translateY(100vh) rotate(360deg); opacity: 0; } }';
     document.head.appendChild(style);
   }
+
+  // ========== ЛАЙТБОКС ДЛЯ ФОТО ==========
+  const lightbox = document.getElementById('lightbox');
+  const lightboxImg = document.getElementById('lightbox-img');
+  const closeBtn = document.querySelector('.close-lightbox');
+  function openLightbox(imgSrc) {
+    lightbox.style.display = 'flex';
+    lightboxImg.src = imgSrc;
+  }
+  function closeLightbox() {
+    lightbox.style.display = 'none';
+  }
+  lightbox.addEventListener('click', function(e) {
+    if (e.target === lightbox) closeLightbox();
+  });
+  if (closeBtn) closeBtn.addEventListener('click', closeLightbox);
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && lightbox && lightbox.style.display === 'flex') closeLightbox();
+  });
+  document.querySelectorAll('.clickable-photo').forEach(img => {
+    img.addEventListener('click', (e) => {
+      e.stopPropagation();
+      openLightbox(img.src);
+    });
+  });
 });
