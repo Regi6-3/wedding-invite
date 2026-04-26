@@ -2,82 +2,215 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <title>Админка свадьбы</title>
+  <title>Админка свадьбы – все анкеты</title>
   <style>
-    body { font-family: system-ui; background: #f0f2f5; padding: 20px; }
-    .guest-card { background: white; border-radius: 20px; padding: 20px; margin-bottom: 24px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-    h2 { color: #2c3e2f; margin-bottom: 8px; }
-    table { width: 100%; border-collapse: collapse; margin: 15px 0; background: white; }
-    th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-    th { background: #f3f1ea; }
-    .info { margin-bottom: 15px; }
-    .warning { color: #c45; font-style: italic; }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+      background: #f0f2f5;
+      padding: 20px;
+    }
+    .container {
+      max-width: 1300px;
+      margin: 0 auto;
+    }
+    h1 {
+      color: #4A5D3E;
+      border-left: 5px solid #9B6B5C;
+      padding-left: 16px;
+      margin-bottom: 24px;
+    }
+    .toolbar {
+      margin: 20px 0;
+      text-align: right;
+    }
+    button {
+      background: #9B6B5C;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 40px;
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+    button:hover { background: #7a4e42; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    th, td {
+      padding: 12px 10px;
+      text-align: left;
+      border-bottom: 1px solid #e2e2e2;
+      vertical-align: middle;
+    }
+    th {
+      background: #f3f1ea;
+      font-weight: 600;
+      color: #2c3e2f;
+    }
+    .guest-row-main {
+      background-color: #fef7e8;
+    }
+    .guest-row-companion {
+      background-color: #faf8f3;
+    }
+    .delete-btn {
+      background: #d9534f;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 0.75rem;
+    }
+    .delete-btn:hover {
+      background: #c9302c;
+    }
+    .note {
+      margin-top: 20px;
+      font-size: 0.8rem;
+      color: #666;
+      text-align: center;
+    }
+    .loading {
+      text-align: center;
+      padding: 40px;
+    }
   </style>
 </head>
 <body>
-<h1>📋 Все гости и их дополнительные анкеты</h1>
-<div id="allGuests">Загрузка...</div>
+<div class="container">
+  <h1>📋 Все анкеты (основные + дополнительные)</h1>
+  <div class="toolbar">
+    <button id="refreshBtn">⟳ Обновить</button>
+  </div>
+  <div id="tableContainer">Загрузка...</div>
+  <div class="note">🔹 Жёлтые строки – основная анкета. 🔹 Светлые строки – дополнительная анкета. Кнопка удаляет только эту анкету.</div>
+</div>
+
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 <script src="firebase-config.js"></script>
 <script>
-  async function loadAllGuests() {
-    const container = document.getElementById('allGuests');
+  const db = firebase.firestore();
+
+  async function loadAllData() {
+    const container = document.getElementById('tableContainer');
+    container.innerHTML = '<div class="loading">Загрузка...</div>';
     try {
-      const snapshot = await db.collection("guests").orderBy("timestamp", "desc").get();
-      if (snapshot.empty) {
-        container.innerHTML = '<p>Нет ответов</p>';
+      const guestsSnapshot = await db.collection("guests").orderBy("timestamp", "desc").get();
+      if (guestsSnapshot.empty) {
+        container.innerHTML = '<p>Нет данных</p>';
         return;
       }
-      let html = '';
-      for (const guestDoc of snapshot.docs) {
+      let rowsHtml = '';
+      for (const guestDoc of guestsSnapshot.docs) {
         const g = guestDoc.data();
-        html += `<div class="guest-card">
-          <h2>${g.name || 'Без имени'}</h2>
-          <div class="info">✅ ${g.attending ? 'Придёт' : 'Не придёт'} | 📅 ${g.timestamp?.toDate().toLocaleString() || '—'}</div>
-          <div class="info"><strong>Основная анкета:</strong> 
-            Трансфер: ${g.transfer || '—'}, 
-            Алкоголь: ${g.alcohol || '—'}, 
-            След. день: ${g.nextDay || '—'}, 
-            Ночёвка: ${g.overnight || '—'}, 
-            Диета: ${g.diet || '—'}
-          </div>`;
-
-        // Подколлекция companions
-        const compSnap = await guestDoc.ref.collection("companions").orderBy("timestamp").get();
-        if (!compSnap.empty) {
-          html += `<h3>📄 Дополнительные анкеты (${compSnap.size})</h3>
-          <table class="companion-table">
-            <thead>
-              <tr>
-                <th>Имя</th><th>Трансфер</th><th>Алкоголь</th><th>След. день</th><th>Ночёвка</th><th>Диета</th>
-              </tr>
-            </thead>
-            <tbody>`;
-          compSnap.forEach(c => {
-            const comp = c.data();
-            html += `<tr>
-              <td><strong>${comp.name || '—'}</strong></td>
-              <td>${comp.transfer || '—'}</td>
-              <td>${comp.alcohol || '—'}</td>
-              <td>${comp.nextDay || '—'}</td>
-              <td>${comp.overnight || '—'}</td>
-              <td>${comp.diet || '—'}</td>
-            </tr>`;
-          });
-          html += `</tbody></table>`;
-        } else {
-          html += `<p><em>Дополнительные анкеты не добавлены</em></p>`;
+        const guestId = guestDoc.id;
+        // Основная строка
+        rowsHtml += `
+          <tr class="guest-row-main" data-guest-id="${guestId}" data-companion-id="">
+            <td><strong>${escapeHtml(g.name || 'Без имени')}</strong></td>
+            <td>${g.attending ? '✅ Да' : '❌ Нет'}</td>
+            <td>${escapeHtml(g.transfer || '—')}</td>
+            <td>${escapeHtml(g.alcohol || '—')}</td>
+            <td>${escapeHtml(g.nextDay || '—')}</td>
+            <td>${escapeHtml(g.overnight || '—')}</td>
+            <td>${escapeHtml(g.diet || '—')}</td>
+            <td><button class="delete-btn" data-type="main" data-id="${guestId}">🗑️ Удалить</button></td>
+          </tr>
+        `;
+        // Загружаем companions
+        const companionsSnap = await guestDoc.ref.collection("companions").orderBy("timestamp", "desc").get();
+        for (const compDoc of companionsSnap.docs) {
+          const c = compDoc.data();
+          const compId = compDoc.id;
+          rowsHtml += `
+            <tr class="guest-row-companion" data-guest-id="${guestId}" data-companion-id="${compId}">
+              <td><em>${escapeHtml(c.name || 'Без имени')}</em> <span style="font-size:0.7rem;">(доп.)</span></td>
+              <td>—</td>
+              <td>${escapeHtml(c.transfer || '—')}</td>
+              <td>${escapeHtml(c.alcohol || '—')}</td>
+              <td>${escapeHtml(c.nextDay || '—')}</td>
+              <td>${escapeHtml(c.overnight || '—')}</td>
+              <td>${escapeHtml(c.diet || '—')}</td>
+              <td><button class="delete-btn" data-type="companion" data-guest-id="${guestId}" data-companion-id="${compId}">🗑️ Удалить</button></td>
+            </tr>
+          `;
         }
-        html += `</div>`;
       }
-      container.innerHTML = html;
+      const tableHtml = `
+        <table>
+          <thead>
+            <tr>
+              <th>Имя</th><th>Придёт?</th><th>Трансфер</th><th>Алкоголь</th><th>След. день</th><th>Ночёвка</th><th>Диета</th><th>Действие</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${rowsHtml}
+          </tbody>
+        </table>
+      `;
+      container.innerHTML = tableHtml;
+      // Подключаем обработчики кнопок удаления
+      document.querySelectorAll('.delete-btn').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+          e.stopPropagation();
+          const type = btn.getAttribute('data-type');
+          if (type === 'main') {
+            const guestId = btn.getAttribute('data-id');
+            if (confirm('Удалить основную анкету и всех её близких? Это действие необратимо.')) {
+              try {
+                // Удаляем всех companions подколлекции
+                const guestRef = db.collection("guests").doc(guestId);
+                const companions = await guestRef.collection("companions").get();
+                const batch = db.batch();
+                companions.forEach(doc => batch.delete(doc.ref));
+                batch.delete(guestRef);
+                await batch.commit();
+                alert('Удалено');
+                loadAllData(); // обновить таблицу
+              } catch(err) {
+                alert('Ошибка: ' + err.message);
+              }
+            }
+          } else if (type === 'companion') {
+            const guestId = btn.getAttribute('data-guest-id');
+            const companionId = btn.getAttribute('data-companion-id');
+            if (confirm('Удалить дополнительную анкету?')) {
+              try {
+                await db.collection("guests").doc(guestId).collection("companions").doc(companionId).delete();
+                alert('Удалено');
+                loadAllData();
+              } catch(err) {
+                alert('Ошибка: ' + err.message);
+              }
+            }
+          }
+        });
+      });
     } catch (err) {
-      container.innerHTML = `<p class="warning">Ошибка: ${err.message}</p>`;
-      console.error(err);
+      container.innerHTML = `<p style="color:red;">Ошибка: ${err.message}</p>`;
     }
   }
-  loadAllGuests();
+
+  function escapeHtml(str) {
+    if (!str) return '';
+    return String(str).replace(/[&<>]/g, function(m) {
+      if (m === '&') return '&amp;';
+      if (m === '<') return '&lt;';
+      if (m === '>') return '&gt;';
+      return m;
+    });
+  }
+
+  document.getElementById('refreshBtn').addEventListener('click', () => loadAllData());
+  loadAllData();
 </script>
 </body>
 </html>
