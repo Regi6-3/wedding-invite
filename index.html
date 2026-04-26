@@ -7,7 +7,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Roboto:wght@300;400;500&family=Cormorant+Infant:wght@300;400;600;700&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-  <link rel="stylesheet" href="style.css?v=11">
+  <link rel="stylesheet" href="style.css?v=13">
 </head>
 <body>
 
@@ -24,7 +24,7 @@
 
     <div class="photo-card">
       <div class="photo-name-block">
-        <img src="images/alexey.png" alt="Алексей" class="portrait">
+        <img src="images/alexey.png" alt="Алексей" class="portrait clickable-photo">
         <div class="name-caption">Алексей</div>
       </div>
     </div>
@@ -33,7 +33,7 @@
 
     <div class="photo-card">
       <div class="photo-name-block">
-        <img src="images/regina.png" alt="Регина" class="portrait">
+        <img src="images/regina.png" alt="Регина" class="portrait clickable-photo">
         <div class="name-caption">Регина</div>
       </div>
     </div>
@@ -56,7 +56,7 @@
       <strong>28.08.2026 в 18:00 Гостевой дом "Чайковский", ул. Деметьева 51.</strong></p>
 
       <div class="small-photo">
-        <img src="images/small_venue.jpg" alt="Место проведения">
+        <img src="images/small_venue.jpg" alt="Место проведения" class="clickable-photo">
       </div>
 
       <div class="love-quote-under-photo">Там, где посеяна любовь, растёт радость.</div>
@@ -177,7 +177,6 @@
       </div>
     </div>
 
-    <!-- ГРУППОВОЙ ЧАТ -->
     <div class="group-chat-wrapper">
       <div class="group-chat-title">Групповой чат</div>
       <div class="group-chat-block">
@@ -193,6 +192,12 @@
 </div>
 
 <footer>С нетерпением ждём встречи!</footer>
+
+<!-- Модальное окно для увеличения фото -->
+<div id="lightbox" class="lightbox">
+  <span class="close-lightbox">&times;</span>
+  <img class="lightbox-content" id="lightbox-img">
+</div>
 
 <script src="https://api-maps.yandex.ru/2.1/?apikey=2a8507ed-e687-4126-9be0-6cdd78c97036&lang=ru_RU"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
